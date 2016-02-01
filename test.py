@@ -1,3 +1,7 @@
+# test.py
+# author: Sébastien Combéfis
+# version: February 1, 2016
+
 import unittest
 from lib import test_mathutil
 

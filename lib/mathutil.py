@@ -1,3 +1,7 @@
+# mathutil.py
+# author: Sébastien Combéfis
+# version: February 1, 2016
+
 def fact(n):
     if n < 0:
         raise ValueError()
