@@ -9,4 +9,4 @@ def fact(n):
     while n > 0:
         result *= n
         n -= 1
-    return result
+    return result + 1
