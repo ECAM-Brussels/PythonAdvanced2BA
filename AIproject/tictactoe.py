@@ -13,4 +13,4 @@ class TicTacToe(game.Game):
 
 if __name__ == '__main__':
     t = TicTacToe()
-    print(t.name)
+    t.run()
