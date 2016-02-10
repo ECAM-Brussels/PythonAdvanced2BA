@@ -5,6 +5,11 @@
 from abc import *
 import socket
 
+class InvalidMoveException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class Game(metaclass=ABCMeta):
     def __init__(self, name, nbplayers):
         self.__name = name
@@ -22,6 +27,10 @@ class Game(metaclass=ABCMeta):
     def isvalid(self, move):
         ...
     
+    @abstractmethod
+    def isfinished(self):
+        ...
+    
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostname(), 5000))
@@ -30,5 +39,11 @@ class Game(metaclass=ABCMeta):
         while len(self.__players) < self.__nbplayers:
             self.__players.append(s.accept())
     
+    def _gameloop(self):
+        currentplayer = 0
+        while not self.isfinished():
+            pass
+    
     def run(self):
         self._waitplayers()
+        self._gameloop()

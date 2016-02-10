@@ -14,7 +14,13 @@ class TicTacToe(game.Game):
         ]
     
     def isvalid(self, move):
-        pass
+        if not (type(move) == tuple and len(move) == 2):
+            raise InvalidMoveException('A valid move must be a two-element tuple')
+        if not (0 <= move[0] <= 2 and 0 <= move[1] <= 2):
+            raise InvalidMoveException('The move is outside of the board')
+        if self.__state[move[0]][move[1]] is None:
+            raise InvalidMoveException('The specified cell is not empty')
+        return True
     
     def isfinished(self):
         pass
