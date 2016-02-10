@@ -14,6 +14,7 @@ class Game(metaclass=ABCMeta):
     def __init__(self, name, nbplayers):
         self.__name = name
         self.__nbplayers = nbplayers
+        self.__currentplayer = None
     
     @property
     def name(self):
@@ -23,8 +24,12 @@ class Game(metaclass=ABCMeta):
     def nbplayers(self):
         return self.__nbplayers
     
+    @property
+    def currentplayer(self):
+        return self.__currentplayer
+    
     @abstractmethod
-    def isvalid(self, move):
+    def applymove(self, move):
         ...
     
     @abstractmethod
@@ -40,7 +45,7 @@ class Game(metaclass=ABCMeta):
             self.__players.append(s.accept())
     
     def _gameloop(self):
-        currentplayer = 0
+        self.__currentplayer = 0
         while not self.isfinished():
             pass
     
