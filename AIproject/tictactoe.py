@@ -7,8 +7,16 @@ from lib import game
 class TicTacToe(game.Game):
     def __init__(self):
         super().__init__('Tic-tac-toe', 2)
+        self.__state = [
+            [None, None, None],
+            [None, None, None],
+            [None, None, None]
+        ]
     
     def isvalid(self, move):
+        pass
+    
+    def isfinished(self):
         pass
 
 if __name__ == '__main__':
