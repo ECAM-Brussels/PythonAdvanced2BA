@@ -1,6 +1,6 @@
 # tictactoe.py
 # Author: Sébastien Combéfis
-# Version: February 8, 2016
+# Version: February 11, 2016
 
 from lib import game
 
@@ -23,7 +23,7 @@ class TicTacToe(game.Game):
         self.__state[move[0]][move[1]] = self.currentplayer
     
     def isfinished(self):
-        pass
+        return self.turns == 9
 
 if __name__ == '__main__':
     t = TicTacToe()

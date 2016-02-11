@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: February 8, 2016
+# Version: February 11, 2016
 
 from abc import *
 import socket
@@ -15,6 +15,7 @@ class Game(metaclass=ABCMeta):
         self.__name = name
         self.__nbplayers = nbplayers
         self.__currentplayer = None
+        self.__turns = 0
     
     @property
     def name(self):
@@ -27,6 +28,10 @@ class Game(metaclass=ABCMeta):
     @property
     def currentplayer(self):
         return self.__currentplayer
+    
+    @property
+    def turns(self):
+        return self.__turns
     
     @abstractmethod
     def applymove(self, move):
@@ -47,7 +52,8 @@ class Game(metaclass=ABCMeta):
     def _gameloop(self):
         self.__currentplayer = 0
         while not self.isfinished():
-            pass
+            self.__turns += 1
+            self.__currentplayer = (self.__currentplayer + 1) % self.nbplayers
     
     def run(self):
         self._waitplayers()
