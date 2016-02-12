@@ -82,6 +82,11 @@ class GameServer(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
+        # Notify players that the game ended
+        for player in self.__players:
+            player.send('END'.encode())
+        if self.__verbose:
+            print('Game ended')
     
     def run(self):
         self._waitplayers()
@@ -117,6 +122,10 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Next move:', move)
                 server.send(move.encode())
+            elif command == 'END':
+                running = False
+                if self.__verbose:
+                    print('Game ended')
             else:
                 if self.__verbose:
                     print('Specific data received:', data)
