@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: February 11, 2016
+# Version: February 12, 2016
 
 from abc import *
 import socket
@@ -58,3 +58,10 @@ class GameServer(metaclass=ABCMeta):
     def run(self):
         self._waitplayers()
         self._gameloop()
+
+
+class GameClient(metaclass=ABCMeta):
+    def __init__(self, server):
+        self.__server = server
+        s = socket.socket()
+        s.connect(server)

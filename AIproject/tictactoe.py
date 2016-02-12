@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
 # tictactoe.py
 # Author: Sébastien Combéfis
-# Version: February 11, 2016
+# Version: February 12, 2016
 
+import sys
 from lib import game
 
-class TicTacToe(game.GameServer):
+class TicTacToeServer(game.GameServer):
     def __init__(self):
         super().__init__('Tic-tac-toe', 2)
         self.__state = [
@@ -25,6 +27,11 @@ class TicTacToe(game.GameServer):
     def isfinished(self):
         return self.turns == 9
 
+
+class TicTacToeClient(game.GameClient):
+    def __init__(self, server):
+        super().__init__(server)
+
 if __name__ == '__main__':
-    t = TicTacToe()
+    t = TicTacToeServer()
     t.run()
