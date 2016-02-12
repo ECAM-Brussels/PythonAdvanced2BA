@@ -62,6 +62,6 @@ class GameServer(metaclass=ABCMeta):
 
 class GameClient(metaclass=ABCMeta):
     def __init__(self, server):
-        self.__server = server
+        self.__server = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)[0][4]
         s = socket.socket()
-        s.connect(server)
+        s.connect(self.__server)

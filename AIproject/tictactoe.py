@@ -3,7 +3,9 @@
 # Author: Sébastien Combéfis
 # Version: February 12, 2016
 
+import argparse
 import sys
+
 from lib import game
 
 class TicTacToeServer(game.GameServer):
@@ -29,9 +31,26 @@ class TicTacToeServer(game.GameServer):
 
 
 class TicTacToeClient(game.GameClient):
-    def __init__(self, server):
+    def __init__(self, name, server):
         super().__init__(server)
+        self.__name = name
 
 if __name__ == '__main__':
-    t = TicTacToeServer()
-    t.run()
+    # Create the top-level parser
+    parser = argparse.ArgumentParser(description='Tic-tac-toe game')
+    subparsers = parser.add_subparsers(description='server client', help='Tic-tac-toe game components', dest='component')
+    # Create the parser for the 'server' subcommand
+    server_parser = subparsers.add_parser('server', help='launch a server')
+    server_parser.add_argument('--host', help='hostname (default: localhost)', default='localhost')
+    server_parser.add_argument('--port', help='port to listen on (default: 5000)', default=5000)
+    # Create the parser for the 'client' subcommand
+    client_parser = subparsers.add_parser('client', help='launch a client')
+    client_parser.add_argument('name', help='name of the player')
+    client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default='localhost')
+    client_parser.add_argument('--port', help='port of the server (default: 5000)', default=5000)
+    # Parse the arguments of sys.args
+    args = parser.parse_args()
+    if args.component == 'server':
+        TicTacToeServer().run()
+    else:
+        TicTacToeClient(args.name, (args.host, args.port))
