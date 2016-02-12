@@ -30,8 +30,24 @@ class TicTacToeServer(game.GameServer):
             print(e)
             raise game.InvalidMoveException('A valid move must be a two-integer tuple')
     
-    def isfinished(self):
-        return self.turns == 9
+    def winner(self):
+        state = self.__state
+        if self.turns >= 5:
+            # Check horizontal and vertical lines
+            for i in range(3):
+                if state[i][0] is not None and all(elem == state[i][0] for elem in state[i]):
+                    return state[i][0]
+                if state[0][i] is not None and all(elem == state[0][i] for elem in [state[e][i] for e in range(3)]):
+                    return state[0][i]
+            # Check diagonals
+            if state[0][0] is not None and all(elem == state[0][0] for elem in [state[e][e] for e in range(3)]):
+                return state[0][0]
+            if state[0][2] is not None and all(elem == state[0][2] for elem in [state[2-e][e] for e in range(3)]):
+                return state[0][2]
+            return -1
+        elif self.turns == 9:
+            return None
+        return -1
     
     @property
     def state(self):

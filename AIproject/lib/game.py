@@ -39,7 +39,7 @@ class GameServer(metaclass=ABCMeta):
         ...
     
     @abstractmethod
-    def isfinished(self):
+    def winner(self):
         ...
     
     @property
@@ -60,12 +60,17 @@ class GameServer(metaclass=ABCMeta):
         # Notify players that the game started
         for player in self.__players:
             player.send('START'.encode())
+            data = player.recv(1024).decode()
+            if data != 'READY':
+                return False
+        return True
         if self.__verbose:
             print('Game started')
     
     def _gameloop(self):
         self.__currentplayer = 0
-        while not self.isfinished():
+        winner = -1
+        while winner == -1:
             player = self.__players[self.__currentplayer]
             if self.__verbose:
                 print('Player', self.__currentplayer, "'s turn")
@@ -82,15 +87,26 @@ class GameServer(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
+            winner = self.winner()
+        # Notify players about won/lost status
+        if winner != None:
+            for i in range(self.nbplayers):
+                self.__players[i].send(('WON' if winner == i else 'LOST').encode())
+            if self.__verbose:
+                print('The winner is player', winner)
         # Notify players that the game ended
-        for player in self.__players:
-            player.send('END'.encode())
+        else:
+            for player in self.__players:
+                player.send('END'.encode())
         if self.__verbose:
             print('Game ended')
     
     def run(self):
-        self._waitplayers()
-        self._gameloop()
+        if self._waitplayers():
+            self._gameloop()
+        else:
+            if self.__verbose:
+                print('Players not ready')
 
 
 class GameClient(metaclass=ABCMeta):
@@ -111,6 +127,7 @@ class GameClient(metaclass=ABCMeta):
             data = server.recv(1024).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
+                server.send('READY'.encode())
                 if self.__verbose:
                     print('Game started')
             elif command == 'PLAY':
@@ -122,10 +139,15 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Next move:', move)
                 server.send(move.encode())
-            elif command == 'END':
+            elif command in ('WON', 'LOST', 'END'):
                 running = False
                 if self.__verbose:
-                    print('Game ended')
+                    if command == 'WON':
+                        print('You won the game')
+                    elif command == 'LOST':
+                        print('You lost the game')
+                    else:
+                        print('Game ended')
             else:
                 if self.__verbose:
                     print('Specific data received:', data)
