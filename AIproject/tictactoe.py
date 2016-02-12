@@ -19,11 +19,11 @@ class TicTacToeServer(game.GameServer):
     
     def applymove(self, move):
         if not (type(move) == tuple and len(move) == 2):
-            raise InvalidMoveException('A valid move must be a two-element tuple')
+            raise game.InvalidMoveException('A valid move must be a two-element tuple')
         if not (0 <= move[0] <= 2 and 0 <= move[1] <= 2):
-            raise InvalidMoveException('The move is outside of the board')
+            raise game.InvalidMoveException('The move is outside of the board')
         if self.__state[move[0]][move[1]] is None:
-            raise InvalidMoveException('The specified cell is not empty')
+            raise game.InvalidMoveException('The specified cell is not empty')
         self.__state[move[0]][move[1]] = self.currentplayer
     
     def isfinished(self):
