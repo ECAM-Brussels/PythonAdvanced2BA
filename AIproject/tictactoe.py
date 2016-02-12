@@ -4,7 +4,7 @@
 
 from lib import game
 
-class TicTacToe(game.Game):
+class TicTacToe(game.GameServer):
     def __init__(self):
         super().__init__('Tic-tac-toe', 2)
         self.__state = [

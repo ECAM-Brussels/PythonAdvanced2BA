@@ -10,7 +10,7 @@ class InvalidMoveException(Exception):
         super().__init__(message)
 
 
-class Game(metaclass=ABCMeta):
+class GameServer(metaclass=ABCMeta):
     def __init__(self, name, nbplayers):
         self.__name = name
         self.__nbplayers = nbplayers
