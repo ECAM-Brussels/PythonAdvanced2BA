@@ -18,13 +18,17 @@ class TicTacToeServer(game.GameServer):
         ]
     
     def applymove(self, move):
-        if not (type(move) == tuple and len(move) == 2):
-            raise game.InvalidMoveException('A valid move must be a two-element tuple')
-        if not (0 <= move[0] <= 2 and 0 <= move[1] <= 2):
-            raise game.InvalidMoveException('The move is outside of the board')
-        if self.__state[move[0]][move[1]] is None:
-            raise game.InvalidMoveException('The specified cell is not empty')
-        self.__state[move[0]][move[1]] = self.currentplayer
+        try:
+            index = int(move)
+            move = (index // 3, index % 3)
+            if not (0 <= move[0] <= 2 and 0 <= move[1] <= 2):
+                raise game.InvalidMoveException('The move is outside of the board')
+            if self.__state[move[0]][move[1]] is not None:
+                raise game.InvalidMoveException('The specified cell is not empty')
+            self.__state[move[0]][move[1]] = self.currentplayer
+        except Exception as e:
+            print(e)
+            raise game.InvalidMoveException('A valid move must be a two-integer tuple')
     
     def isfinished(self):
         return self.turns == 9
@@ -43,7 +47,8 @@ class TicTacToeClient(game.GameClient):
         pass
     
     def _nextmove(self, state):
-        pass
+        state = [None if value == 'None' else int(value) for value in state.split(' ')]
+        return str(state.index(None))
 
 if __name__ == '__main__':
     # Create the top-level parser

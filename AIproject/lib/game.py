@@ -69,12 +69,18 @@ class GameServer(metaclass=ABCMeta):
             player = self.__players[self.__currentplayer]
             if self.__verbose:
                 print('Player', self.__currentplayer, "'s turn")
+                print('State of the game:', self.state)
             player.send('PLAY {}'.format(self.state).encode())
             try:
-                self.applymove(player.recv(1024))
+                move = player.recv(1024).decode()
+                if self.__verbose:
+                    print('Move:', move)
+                self.applymove(move)
                 self.__turns += 1
                 self.__currentplayer = (self.__currentplayer + 1) % self.nbplayers
             except InvalidMoveException as e:
+                if self.__verbose:
+                    print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
     
     def run(self):
@@ -103,8 +109,17 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Game started')
             elif command == 'PLAY':
-                self._nextmove(data[data.index(' ')+1:])
+                state = data[data.index(' ')+1:]
+                if self.__verbose:
+                    print("Player's turn to play")
+                    print('State of the game:', state)
+                move = self._nextmove(state)
+                if self.__verbose:
+                    print('Next move:', move)
+                server.send(move.encode())
             else:
+                if self.__verbose:
+                    print('Specific data received:', data)
                 self._handle(data)
     
     @abstractmethod
