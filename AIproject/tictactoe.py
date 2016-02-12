@@ -10,7 +10,7 @@ from lib import game
 
 class TicTacToeServer(game.GameServer):
     def __init__(self):
-        super().__init__('Tic-tac-toe', 2)
+        super().__init__('Tic-tac-toe', 1)
         self.__state = [
             [None, None, None],
             [None, None, None],
@@ -34,6 +34,9 @@ class TicTacToeClient(game.GameClient):
     def __init__(self, name, server):
         super().__init__(server)
         self.__name = name
+    
+    def _handlecommand(self, command):
+        print('Command received', command)
 
 if __name__ == '__main__':
     # Create the top-level parser
