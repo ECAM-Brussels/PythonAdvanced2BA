@@ -9,8 +9,8 @@ import sys
 from lib import game
 
 class TicTacToeServer(game.GameServer):
-    def __init__(self):
-        super().__init__('Tic-tac-toe', 1)
+    def __init__(self, verbose=False):
+        super().__init__('Tic-tac-toe', 2, verbose=verbose)
         self.__state = [
             [None, None, None],
             [None, None, None],
@@ -35,8 +35,8 @@ class TicTacToeServer(game.GameServer):
 
 
 class TicTacToeClient(game.GameClient):
-    def __init__(self, name, server):
-        super().__init__(server)
+    def __init__(self, name, server, verbose=False):
+        super().__init__(server, verbose=verbose)
         self.__name = name
     
     def _handle(self, message):
@@ -53,14 +53,16 @@ if __name__ == '__main__':
     server_parser = subparsers.add_parser('server', help='launch a server')
     server_parser.add_argument('--host', help='hostname (default: localhost)', default='localhost')
     server_parser.add_argument('--port', help='port to listen on (default: 5000)', default=5000)
+    server_parser.add_argument('--verbose', action='store_true')
     # Create the parser for the 'client' subcommand
     client_parser = subparsers.add_parser('client', help='launch a client')
     client_parser.add_argument('name', help='name of the player')
     client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default='localhost')
     client_parser.add_argument('--port', help='port of the server (default: 5000)', default=5000)
+    client_parser.add_argument('--verbose', action='store_true')
     # Parse the arguments of sys.args
     args = parser.parse_args()
     if args.component == 'server':
-        TicTacToeServer().run()
+        TicTacToeServer(verbose=args.verbose).run()
     else:
-        TicTacToeClient(args.name, (args.host, args.port))
+        TicTacToeClient(args.name, (args.host, args.port), verbose=args.verbose)

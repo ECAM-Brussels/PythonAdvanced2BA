@@ -11,9 +11,10 @@ class InvalidMoveException(Exception):
 
 
 class GameServer(metaclass=ABCMeta):
-    def __init__(self, name, nbplayers):
+    def __init__(self, name, nbplayers, verbose=False):
         self.__name = name
         self.__nbplayers = nbplayers
+        self.__verbose = verbose
         self.__currentplayer = None
         self.__turns = 0
     
@@ -51,15 +52,23 @@ class GameServer(metaclass=ABCMeta):
         s.bind((socket.gethostname(), 5000))
         s.listen()
         self.__players = []
+        # Wait for enough players for a play
         while len(self.__players) < self.__nbplayers:
             self.__players.append(s.accept()[0])
+            if self.__verbose:
+                print('New client connected', len(self.__players), '/', self.nbplayers)
+        # Notify players that the game started
         for player in self.__players:
             player.send('START'.encode())
+        if self.__verbose:
+            print('Game started')
     
     def _gameloop(self):
         self.__currentplayer = 0
         while not self.isfinished():
             player = self.__players[self.__currentplayer]
+            if self.__verbose:
+                print('Player', self.__currentplayer, "'s turn")
             player.send('PLAY {}'.format(self.state).encode())
             try:
                 self.applymove(player.recv(1024))
@@ -74,10 +83,13 @@ class GameServer(metaclass=ABCMeta):
 
 
 class GameClient(metaclass=ABCMeta):
-    def __init__(self, server):
+    def __init__(self, server, verbose=False):
+        self.__verbose = verbose
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
         s = socket.socket()
         s.connect(addrinfos[0][4])
+        if self.__verbose:
+            print('Connected to the server')
         self.__server = s
         self._gameloop()
     
@@ -88,7 +100,8 @@ class GameClient(metaclass=ABCMeta):
             data = server.recv(1024).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
-                pass
+                if self.__verbose:
+                    print('Game started')
             elif command == 'PLAY':
                 self._nextmove(data[data.index(' ')+1:])
             else:
