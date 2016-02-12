@@ -1,16 +1,18 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: February 12, 2016
+# Version: February 13, 2016
 
 from abc import *
 import socket
 
 class InvalidMoveException(Exception):
+    '''Exception representing an invalid move'''
     def __init__(self, message):
         super().__init__(message)
 
 
 class GameServer(metaclass=ABCMeta):
+    '''Abstract class representing a generic game server'''
     def __init__(self, name, nbplayers, verbose=False):
         self.__name = name
         self.__nbplayers = nbplayers
@@ -36,15 +38,34 @@ class GameServer(metaclass=ABCMeta):
     
     @abstractmethod
     def applymove(self, move):
+        '''Apply a move.
+    
+        Pre: 'move' is valid
+        Post: The specified 'move' have been applied to the game for the current player.
+        Raises InvalidMoveException: If 'move' is invalid.
+        '''
         ...
     
     @abstractmethod
     def winner(self):
+        '''Check whether there is a winner.
+    
+        Pre: -
+        Post: The returned value contains:
+              -1 if there is no winner yet (and the game is still going on);
+              None if the game ended with a draw;
+              the number of the winning player, otherwise (between 0 and self.nbplayers-1).
+        '''
         ...
     
     @property
     @abstractmethod
     def state(self):
+        '''Get a representation of the state.
+    
+        Pre: -
+        Post: The returned value contains a one-line string representation of the game' state.
+        '''
         ...
     
     def _waitplayers(self):
@@ -110,6 +131,7 @@ class GameServer(metaclass=ABCMeta):
 
 
 class GameClient(metaclass=ABCMeta):
+    '''Abstract class representing a game client'''
     def __init__(self, server, verbose=False):
         self.__verbose = verbose
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
@@ -155,8 +177,19 @@ class GameClient(metaclass=ABCMeta):
     
     @abstractmethod
     def _handle(self, command):
+        '''Handle a command.
+    
+        Pre: command != ''
+        Post: The specified 'command' has been handled.
+        '''
         ...
     
     @abstractmethod
     def _nextmove(self, state):
+        '''Get the next move to play.
+    
+        Pre: 'state' is a valid game' state.
+        Post: The returned value contains a valid move to be played by this player
+              in the specified 'state' of the game.
+        '''
         ...

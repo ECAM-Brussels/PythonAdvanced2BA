@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # tictactoe.py
 # Author: Sébastien Combéfis
-# Version: February 12, 2016
+# Version: February 13, 2016
 
 import argparse
 import sys
@@ -9,6 +9,7 @@ import sys
 from lib import game
 
 class TicTacToeServer(game.GameServer):
+    '''Class representing a server for the Tic-tac-toe game'''
     def __init__(self, verbose=False):
         super().__init__('Tic-tac-toe', 2, verbose=verbose)
         self.__state = [
@@ -26,8 +27,7 @@ class TicTacToeServer(game.GameServer):
             if self.__state[move[0]][move[1]] is not None:
                 raise game.InvalidMoveException('The specified cell is not empty')
             self.__state[move[0]][move[1]] = self.currentplayer
-        except Exception as e:
-            print(e)
+        except:
             raise game.InvalidMoveException('A valid move must be a two-integer tuple')
     
     def winner(self):
@@ -55,6 +55,7 @@ class TicTacToeServer(game.GameServer):
 
 
 class TicTacToeClient(game.GameClient):
+    '''Class representing a client for the Tic-tac-toe game'''
     def __init__(self, name, server, verbose=False):
         super().__init__(server, verbose=verbose)
         self.__name = name
@@ -65,6 +66,7 @@ class TicTacToeClient(game.GameClient):
     def _nextmove(self, state):
         state = [None if value == 'None' else int(value) for value in state.split(' ')]
         return str(state.index(None))
+
 
 if __name__ == '__main__':
     # Create the top-level parser
