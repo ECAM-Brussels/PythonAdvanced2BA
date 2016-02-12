@@ -41,6 +41,11 @@ class GameServer(metaclass=ABCMeta):
     def isfinished(self):
         ...
     
+    @property
+    @abstractmethod
+    def state(self):
+        ...
+    
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostname(), 5000))
@@ -55,13 +60,13 @@ class GameServer(metaclass=ABCMeta):
         self.__currentplayer = 0
         while not self.isfinished():
             player = self.__players[self.__currentplayer]
-            player.send('PLAY'.encode())
+            player.send('PLAY {}'.format(self.state).encode())
             try:
                 self.applymove(player.recv(1024))
                 self.__turns += 1
                 self.__currentplayer = (self.__currentplayer + 1) % self.nbplayers
             except InvalidMoveException as e:
-                player.send('ERROR {}'.format(e))
+                player.send('ERROR {}'.format(e).encode())
     
     def run(self):
         self._waitplayers()
@@ -80,13 +85,19 @@ class GameClient(metaclass=ABCMeta):
         server = self.__server
         running = True
         while running:
-            command = server.recv(1024).decode()
+            data = server.recv(1024).decode()
+            command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
-                print('Game started')
+                pass
+            elif command == 'PLAY':
+                self._nextmove(data[data.index(' ')+1:])
             else:
-                self._handlecommand(command)
-            command = ''
+                self._handle(data)
     
     @abstractmethod
-    def _handlecommand(self, command):
+    def _handle(self, command):
+        ...
+    
+    @abstractmethod
+    def _nextmove(self, state):
         ...

@@ -28,6 +28,10 @@ class TicTacToeServer(game.GameServer):
     
     def isfinished(self):
         return self.turns == 9
+    
+    @property
+    def state(self):
+        return ' '.join([str(value) for row in self.__state for value in row])
 
 
 class TicTacToeClient(game.GameClient):
@@ -35,8 +39,11 @@ class TicTacToeClient(game.GameClient):
         super().__init__(server)
         self.__name = name
     
-    def _handlecommand(self, command):
-        print('Command received', command)
+    def _handle(self, message):
+        pass
+    
+    def _nextmove(self, state):
+        pass
 
 if __name__ == '__main__':
     # Create the top-level parser
