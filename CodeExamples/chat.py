@@ -9,8 +9,10 @@ import threading
 
 class Chat():
     def __init__(self, host=socket.gethostname(), port=5000):
-        self.__s = socket.socket(type=socket.SOCK_DGRAM)
-        self.__s.bind((host, port))
+        s = socket.socket(type=socket.SOCK_DGRAM)
+        s.settimeout(0.5)
+        s.bind((host, port))
+        self.__s = s
         
     def run(self):
         handlers = {
@@ -28,6 +30,8 @@ class Chat():
             param = line[line.index(' ')+1:] if ' ' in line else ''
             if command in handlers:
                 handlers[command]() if param == '' else handlers[command](param)
+            else:
+                print('Unknown command:', command)
     
     def _exit(self):
         self.__running = False
@@ -51,8 +55,11 @@ class Chat():
     
     def _receive(self):
         while self.__running:
-            data, address = self.__s.recvfrom(1024)
-            print(data.decode())
+            try:
+                data, address = self.__s.recvfrom(1024)
+                print(data.decode())
+            except socket.timeout:
+                pass
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
