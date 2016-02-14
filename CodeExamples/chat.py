@@ -25,9 +25,11 @@ class Chat():
         self.__address = None
         threading.Thread(target=self._receive).start()
         while self.__running:
-            line = sys.stdin.readline().rstrip()
-            command = line[:line.index(' ')] if ' ' in line else line
-            param = line[line.index(' ')+1:] if ' ' in line else ''
+            line = sys.stdin.readline().rstrip() + ' '
+            # Extract the command and the param
+            command = line[:line.index(' ')]
+            param = line[line.index(' ')+1:].rstrip()
+            # Call the command handler
             if command in handlers:
                 handlers[command]() if param == '' else handlers[command](param)
             else:
