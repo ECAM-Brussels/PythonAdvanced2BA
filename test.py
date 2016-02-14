@@ -5,7 +5,7 @@
 import sys
 import unittest
 
-sys.path.append('examples')
+sys.path.append('CodeExamples')
 from lib import test_mathutil
 
 suite = unittest.TestLoader().loadTestsFromTestCase(test_mathutil.TestMathUtil)
