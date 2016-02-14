@@ -8,7 +8,7 @@ import sys
 import threading
 
 class Chat():
-    def __init__(self, host='localhost', port=5000):
+    def __init__(self, host=socket.gethostname(), port=5000):
         self.__s = socket.socket(type=socket.SOCK_DGRAM)
         self.__s.bind((host, port))
         
