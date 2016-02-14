@@ -19,6 +19,7 @@ class EchoServer():
             client, addr = self.__s.accept()
             try:
                 print(self._receive(client).decode())
+                client.close()
             except OSError:
                 print('Erreur lors de la réception du message.')
     
@@ -43,6 +44,7 @@ class EchoClient():
         except OSError:
             print('Serveur introuvable, connexion impossible.')
         self._send()
+        self.__s.close()
     
     def _send(self):
         totalsent = 0

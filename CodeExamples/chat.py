@@ -38,6 +38,7 @@ class Chat():
     def _exit(self):
         self.__running = False
         self.__address = None
+        self.__s.close()
     
     def _quit(self):
         self.__address = None

@@ -20,6 +20,7 @@ class AdderServer():
         while True:
             client, addr = self.__s.accept()
             self._handle(client)
+            client.close()
     
     def _handle(self, client):
         size = struct.unpack('I', client.recv(4))[0]
@@ -37,6 +38,7 @@ class AdderClient():
     def run(self):
         self.__s.connect(SERVERADDRESS)
         print('Somme:', self._compute())
+        self.__s.close()
     
     def _compute(self):
         totalsent = 0
