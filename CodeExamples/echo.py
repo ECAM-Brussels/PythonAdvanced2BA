@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # echo.py
 # author: Sébastien Combéfis
-# version: February 13, 2016
+# version: February 14, 2016
 
 import socket
 import sys
@@ -14,11 +14,19 @@ class EchoServer():
         self.__s.bind(SERVERADDRESS)
         
     def run(self):
-        print('Run server')
         self.__s.listen()
         while True:
             client, addr = self.__s.accept()
-            print(client.recv(1024).decode())
+            print(self._receive(client).decode())
+    
+    def _receive(self, client):
+        chunks = []
+        finished = False
+        while not finished:
+            data = client.recv(1024)
+            chunks.append(data)
+            finished = data == b''
+        return b''.join(chunks)
 
 
 class EchoClient():
@@ -27,10 +35,15 @@ class EchoClient():
         self.__s = socket.socket()
     
     def run(self):
-        print('Run client')
         self.__s.connect(SERVERADDRESS)
-        self.__s.send(self.__message)
-
+        self._send()
+    
+    def _send(self):
+        totalsent = 0
+        msg = self.__message
+        while totalsent < len(msg):
+            sent = self.__s.send(msg[totalsent:])
+            totalsent += sent
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'server':
