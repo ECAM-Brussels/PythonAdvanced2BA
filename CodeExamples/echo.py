@@ -17,7 +17,10 @@ class EchoServer():
         self.__s.listen()
         while True:
             client, addr = self.__s.accept()
-            print(self._receive(client).decode())
+            try:
+                print(self._receive(client).decode())
+            except OSError:
+                print('Erreur lors de la réception du message.')
     
     def _receive(self, client):
         chunks = []
@@ -35,15 +38,21 @@ class EchoClient():
         self.__s = socket.socket()
     
     def run(self):
-        self.__s.connect(SERVERADDRESS)
+        try:
+            self.__s.connect(SERVERADDRESS)
+        except OSError:
+            print('Serveur introuvable, connexion impossible.')
         self._send()
     
     def _send(self):
         totalsent = 0
         msg = self.__message
-        while totalsent < len(msg):
-            sent = self.__s.send(msg[totalsent:])
-            totalsent += sent
+        try:
+            while totalsent < len(msg):
+                sent = self.__s.send(msg[totalsent:])
+                totalsent += sent
+        except OSError:
+            print("Erreur lors de l'envoi du message.")
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'server':
