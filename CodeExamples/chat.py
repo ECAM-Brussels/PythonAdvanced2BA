@@ -63,6 +63,8 @@ class Chat():
                 print(data.decode())
             except socket.timeout:
                 pass
+            except OSError:
+                return
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
