@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # chat.py
 # author: Sébastien Combéfis
-# version: February 14, 2016
+# version: February 15, 2016
 
 import socket
 import sys
@@ -31,9 +31,12 @@ class Chat():
             param = line[line.index(' ')+1:].rstrip()
             # Call the command handler
             if command in handlers:
-                handlers[command]() if param == '' else handlers[command](param)
+                try:
+                    handlers[command]() if param == '' else handlers[command](param)
+                except:
+                    print("Erreur lors de l'exécution de la commande.")
             else:
-                print('Unknown command:', command)
+                print('Command inconnue:', command)
     
     def _exit(self):
         self.__running = False
@@ -46,15 +49,21 @@ class Chat():
     def _join(self, param):
         tokens = param.split(' ')
         if len(tokens) == 2:
-            self.__address = (socket.gethostbyaddr(tokens[0])[0], int(tokens[1]))
+            try:
+                self.__address = (socket.gethostbyaddr(tokens[0])[0], int(tokens[1]))
+            except OSError:
+                print("Erreur lors de l'envoi du message.")
     
     def _send(self, param):
         if self.__address is not None:
-            message = param.encode()
-            totalsent = 0
-            while totalsent < len(message):
-                sent = self.__s.sendto(message[totalsent:], self.__address)
-                totalsent += sent
+            try:
+                message = param.encode()
+                totalsent = 0
+                while totalsent < len(message):
+                    sent = self.__s.sendto(message[totalsent:], self.__address)
+                    totalsent += sent
+            except OSError:
+                print('Erreur lors de la réception du message.')
     
     def _receive(self):
         while self.__running:

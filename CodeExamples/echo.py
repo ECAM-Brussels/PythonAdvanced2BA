@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # echo.py
 # author: Sébastien Combéfis
-# version: February 14, 2016
+# version: February 15, 2016
 
 import socket
 import sys
@@ -41,10 +41,10 @@ class EchoClient():
     def run(self):
         try:
             self.__s.connect(SERVERADDRESS)
+            self._send()
+            self.__s.close()
         except OSError:
             print('Serveur introuvable, connexion impossible.')
-        self._send()
-        self.__s.close()
     
     def _send(self):
         totalsent = 0

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # adder.py
 # author: Sébastien Combéfis
-# version: February 14, 2016
+# version: February 15, 2016
 
 import pickle
 import socket
@@ -19,8 +19,11 @@ class AdderServer():
         self.__s.listen()
         while True:
             client, addr = self.__s.accept()
-            self._handle(client)
-            client.close()
+            try:
+                self._handle(client)
+                client.close()
+            except OSError:
+                print('Erreur lors du traitement de la requête du client.')
     
     def _handle(self, client):
         size = struct.unpack('I', client.recv(4))[0]
@@ -36,18 +39,24 @@ class AdderClient():
         self.__s = socket.socket()
     
     def run(self):
-        self.__s.connect(SERVERADDRESS)
-        print('Somme:', self._compute())
-        self.__s.close()
+        try:
+            self.__s.connect(SERVERADDRESS)
+            print('Somme:', self._compute())
+            self.__s.close()
+        except OSError:
+            print('Serveur introuvable, connexion impossible.')
     
     def _compute(self):
-        totalsent = 0
-        msg = pickle.dumps(self.__data)
-        self.__s.send(struct.pack('I', len(msg)))
-        while totalsent < len(msg):
-            sent = self.__s.send(msg[totalsent:])
-            totalsent += sent
-        return struct.unpack('I', self.__s.recv(4))[0]
+        try:
+            totalsent = 0
+            msg = pickle.dumps(self.__data)
+            self.__s.send(struct.pack('I', len(msg)))
+            while totalsent < len(msg):
+                sent = self.__s.send(msg[totalsent:])
+                totalsent += sent
+            return struct.unpack('I', self.__s.recv(4))[0]
+        except OSError:
+            print("Erreur lors du calcul de la somme.")
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'server':
