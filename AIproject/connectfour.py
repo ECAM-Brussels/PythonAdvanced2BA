@@ -22,7 +22,7 @@ class ConnectFourServer(game.GameServer):
             [None, None, None, None, None, None],
             [None, None, None, None, None, None]
         ]
-
+    
     def applymove(self, move):
         try:
             move = int(move)
@@ -33,7 +33,7 @@ class ConnectFourServer(game.GameServer):
             self.__state[move][self.__state[move].index(None)] = self.currentplayer
         except:
             raise game.InvalidMoveException('A valid move must be an integer between 0 and 6')
-
+    
     def winner(self):
         state = self.__state
         if self.turns >= 7:
@@ -47,24 +47,24 @@ class ConnectFourServer(game.GameServer):
                 for r in range(6):
                     if state[c][r] is not None and all(elem == state[c][r] for elem in [state[c+i][r] for i in range(4)]):
                         return state[c][r]
-
+            
             # check diagonal
             for c in range(4):
                 for r in range(3):
                     if state[c][r] is not None and all(elem == state[c][r] for elem in [state[c+i][r+i] for i in range(4)]):
                         return state[c][r]
-
+            
             # check other diagonal
             for c in range(3,7):
                 for r in range(3):
                     if state[c][r] is not None and all(elem == state[c][r] for elem in [state[c-i][r+i] for i in range(4)]):
                         return state[c][r]
-
+            
             return -1
         elif self.turns == 6*7:
             return None
         return -1
-
+    
     @property
     def state(self):
         return ' '.join([str(value) for row in self.__state for value in row])
@@ -75,10 +75,10 @@ class ConnectFourClient(game.GameClient):
     def __init__(self, name, server, verbose=False):
         super().__init__(server, verbose=verbose)
         self.__name = name
-
+    
     def _handle(self, message):
         pass
-
+    
     def _nextmove(self, state):
         state = [None if value == 'None' else int(value) for value in state.split(' ')]
         state = [state[i*6:i*6+6] for i in range(7)]
