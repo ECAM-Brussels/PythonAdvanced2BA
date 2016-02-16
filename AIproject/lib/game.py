@@ -19,37 +19,37 @@ class GameServer(metaclass=ABCMeta):
         self.__verbose = verbose
         self.__currentplayer = None
         self.__turns = 0
-    
+
     @property
     def name(self):
         return self.__name
-    
+
     @property
     def nbplayers(self):
         return self.__nbplayers
-    
+
     @property
     def currentplayer(self):
         return self.__currentplayer
-    
+
     @property
     def turns(self):
         return self.__turns
-    
+
     @abstractmethod
     def applymove(self, move):
         '''Apply a move.
-    
+
         Pre: 'move' is valid
         Post: The specified 'move' have been applied to the game for the current player.
         Raises InvalidMoveException: If 'move' is invalid.
         '''
         ...
-    
+
     @abstractmethod
     def winner(self):
         '''Check whether there is a winner.
-    
+
         Pre: -
         Post: The returned value contains:
               -1 if there is no winner yet (and the game is still going on);
@@ -57,17 +57,17 @@ class GameServer(metaclass=ABCMeta):
               the number of the winning player, otherwise (between 0 and self.nbplayers-1).
         '''
         ...
-    
+
     @property
     @abstractmethod
     def state(self):
         '''Get a representation of the state.
-    
+
         Pre: -
         Post: The returned value contains a one-line string representation of the game' state.
         '''
         ...
-    
+
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostname(), 5000))
@@ -87,7 +87,7 @@ class GameServer(metaclass=ABCMeta):
         return True
         if self.__verbose:
             print('Game started')
-    
+
     def _gameloop(self):
         self.__currentplayer = 0
         winner = -1
@@ -95,7 +95,6 @@ class GameServer(metaclass=ABCMeta):
             player = self.__players[self.__currentplayer]
             if self.__verbose:
                 print('Player', self.__currentplayer, "'s turn")
-                print('State of the game:', self.state)
             player.send('PLAY {}'.format(self.state).encode())
             try:
                 move = player.recv(1024).decode()
@@ -108,7 +107,8 @@ class GameServer(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
-            winner = self.winner()
+            print('State of the game:', self.state)
+            winner = self.winner()    
         # Notify players about won/lost status
         if winner != None:
             for i in range(self.nbplayers):
@@ -121,7 +121,7 @@ class GameServer(metaclass=ABCMeta):
                 player.send('END'.encode())
         if self.__verbose:
             print('Game ended')
-    
+
     def run(self):
         if self._waitplayers():
             self._gameloop()
@@ -141,7 +141,7 @@ class GameClient(metaclass=ABCMeta):
             print('Connected to the server')
         self.__server = s
         self._gameloop()
-    
+
     def _gameloop(self):
         server = self.__server
         running = True
@@ -174,20 +174,20 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Specific data received:', data)
                 self._handle(data)
-    
+
     @abstractmethod
     def _handle(self, command):
         '''Handle a command.
-    
+
         Pre: command != ''
         Post: The specified 'command' has been handled.
         '''
         ...
-    
+
     @abstractmethod
     def _nextmove(self, state):
         '''Get the next move to play.
-    
+
         Pre: 'state' is a valid game' state.
         Post: The returned value contains a valid move to be played by this player
               in the specified 'state' of the game.
