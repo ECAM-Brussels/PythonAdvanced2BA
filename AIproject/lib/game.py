@@ -107,7 +107,8 @@ class GameServer(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
-            print('State of the game:', self.state)
+            if self.__verbose:
+                print('State of the game:', self.state)
             winner = self.winner()
         # Notify players about won/lost status
         if winner != None:
