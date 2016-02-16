@@ -13,6 +13,7 @@ class Chat():
         s.settimeout(0.5)
         s.bind((host, port))
         self.__s = s
+        print('Écoute sur {}:{}'.format(host, port))
         
     def run(self):
         handlers = {
@@ -51,6 +52,7 @@ class Chat():
         if len(tokens) == 2:
             try:
                 self.__address = (socket.gethostbyaddr(tokens[0])[0], int(tokens[1]))
+                print('Connecté à {}:{}'.format(*self.__address))
             except OSError:
                 print("Erreur lors de l'envoi du message.")
     
