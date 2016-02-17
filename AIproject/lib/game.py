@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: February 13, 2016
+# Version: February 17, 2016
 
 from abc import *
 import socket
@@ -72,6 +72,8 @@ class GameServer(metaclass=ABCMeta):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostname(), 5000))
         s.listen()
+        if self.__verbose:
+            print('Game server listening on {}:{}'.format(socket.gethostname(), 5000))
         self.__players = []
         # Wait for enough players for a play
         while len(self.__players) < self.__nbplayers:
@@ -79,11 +81,16 @@ class GameServer(metaclass=ABCMeta):
             if self.__verbose:
                 print('New client connected', len(self.__players), '/', self.nbplayers)
         # Notify players that the game started
-        for player in self.__players:
-            player.send('START'.encode())
-            data = player.recv(1024).decode()
-            if data != 'READY':
-                return False
+        try:
+            for player in self.__players:
+                player.send('START'.encode())
+                data = player.recv(1024).decode()
+                if data != 'READY':
+                    return False
+        except OSError:
+            if self.__verbose:
+                print('Error while notifying player {}'.format(player))
+            return False
         return True
         if self.__verbose:
             print('Game started')
@@ -126,9 +133,8 @@ class GameServer(metaclass=ABCMeta):
     def run(self):
         if self._waitplayers():
             self._gameloop()
-        else:
-            if self.__verbose:
-                print('Players not ready')
+        elif self.__verbose:
+            print('Players not ready')
 
 
 class GameClient(metaclass=ABCMeta):
@@ -137,11 +143,14 @@ class GameClient(metaclass=ABCMeta):
         self.__verbose = verbose
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
         s = socket.socket()
-        s.connect(addrinfos[0][4])
-        if self.__verbose:
-            print('Connected to the server')
-        self.__server = s
-        self._gameloop()
+        try:
+            s.connect(addrinfos[0][4])
+            if self.__verbose:
+                print('Connected to the game server on {}:{}'.format(*addrinfos[0][4]))
+            self.__server = s
+            self._gameloop()
+        except OSError:
+            print('Impossible to connect to the game server on {}:{}'.format(*addrinfos[0][4]))
     
     def _gameloop(self):
         server = self.__server
