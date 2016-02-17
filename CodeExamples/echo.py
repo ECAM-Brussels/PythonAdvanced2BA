@@ -8,7 +8,7 @@ import sys
 
 SERVERADDRESS = (socket.gethostname(), 6000)
 
-class EchoServer():
+class EchoServer:
     def __init__(self):
         self.__s = socket.socket()
         self.__s.bind(SERVERADDRESS)
@@ -33,7 +33,7 @@ class EchoServer():
         return b''.join(chunks)
 
 
-class EchoClient():
+class EchoClient:
     def __init__(self, message):
         self.__message = message
         self.__s = socket.socket()

@@ -7,7 +7,7 @@ import socket
 import sys
 import threading
 
-class Chat():
+class Chat:
     def __init__(self, host=socket.gethostname(), port=5000):
         s = socket.socket(type=socket.SOCK_DGRAM)
         s.settimeout(0.5)

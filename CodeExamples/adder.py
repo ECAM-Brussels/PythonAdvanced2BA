@@ -10,7 +10,7 @@ import sys
 
 SERVERADDRESS = (socket.gethostname(), 6000)
 
-class AdderServer():
+class AdderServer:
     def __init__(self):
         self.__s = socket.socket()
         self.__s.bind(SERVERADDRESS)
@@ -33,7 +33,7 @@ class AdderServer():
         client.send(struct.pack('I', result))
 
 
-class AdderClient():
+class AdderClient:
     def __init__(self, message):
         self.__data = [int(x) for x in message]
         self.__s = socket.socket()
