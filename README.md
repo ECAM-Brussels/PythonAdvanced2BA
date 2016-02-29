@@ -6,7 +6,17 @@ Please look at the [course website](http://ecam-brussels.github.io/PythonAdvance
 
 ## Code examples
 
+Code examples are organised by topics:
+
+- Abstract Data Type (ADT)
+- Game programming
+- Network programming
+- Regular Expression
+- String manipulation
+
 ## Libraries
+
+- `AIProject` is a framework to implement AI agents for multiplayers game
 
 ## Contributors
 
