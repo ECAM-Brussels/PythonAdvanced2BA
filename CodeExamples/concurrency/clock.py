@@ -15,4 +15,7 @@ def printhour():
 
 scheduler = sched.scheduler(time.time, time.sleep)
 scheduler.enter(1, 1, printhour)
-scheduler.run()
+try:
+    scheduler.run()
+except KeyboardInterrupt:
+    print()
