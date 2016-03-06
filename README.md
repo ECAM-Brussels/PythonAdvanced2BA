@@ -9,6 +9,7 @@ Please look at the [course website](http://ecam-brussels.github.io/PythonAdvance
 Code examples are organised by topics:
 
 - Abstract Data Type (ADT)
+- Concurrent programming
 - Game programming
 - Network programming
 - Regular Expression
@@ -22,4 +23,5 @@ Code examples are organised by topics:
 
 - Sébastien Combéfis
 - Quentin Lurkin
+- Alexis Nootens
 - Benoît Wéry
