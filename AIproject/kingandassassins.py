@@ -90,7 +90,7 @@ KA_INITIAL_STATE = {
 
 class KingAndAssassinsState(game.GameState):
     '''Class representing a state for the King & Assassins game.'''
-    
+
     DIRECTIONS = {
         'E': (0, 1),
         'W': (0, -1),
@@ -100,9 +100,22 @@ class KingAndAssassinsState(game.GameState):
 
     def __init__(self, initialstate=KA_INITIAL_STATE):
         super().__init__(initialstate)
-    
-    def _nextfree(self, x, y, dir):
-        nx, ny = self._getcoord((x, y, dir))
+
+    def _nextfree(self, x, y, d):
+        people = self._state['visible']['people']
+        nx, ny = self._getcoord((x, y, d))
+        ix, iy = nx, ny
+        while 0 <= ix <= 9 and 0 <= iy <= 9 and people[ix][iy] is not None:
+            # Must be a villager
+            if people[ix][iy] not in POPULATION:
+                return None
+            # Cannot be a roof
+            if (ix, iy) != (nx, ny) and BOARD[ix][iy] == 'R':
+                return None
+            ix, iy = self._getcoord((ix, iy, d))
+        if 0 <= ix <= 9 and 0 <= iy <= 9:
+            return (ix, iy)
+        return None
 
     def update(self, moves, player):
         visible = self._state['visible']
@@ -132,7 +145,14 @@ class KingAndAssassinsState(game.GameState):
                     people[x][y], people[nx][ny] = people[nx][ny], people[x][y]
                 # If cell is not free, check if the knight can push villagers
                 else:
-                    pass
+                    nf = self._nextfree((x, y, d))
+                    if nf is None:
+                        raise game.InvalidMoveException('{}: cannot move-and-push in the given direction'.format(move))
+                    nfx, nfy = nf
+                    while (nfx, nfy) != (x, y):
+                        px, py = self._getcoord((nfx, nfx, {'E': 'W', 'W': 'E', 'S': 'N', 'N': 'S'}[d]))
+                        people[nfx][nfy] = people[px][py]
+                        nfx, nfy = px, py
             # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
             elif move[0] == 'arrest':
                 if player != 1:
