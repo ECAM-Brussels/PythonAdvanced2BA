@@ -34,3 +34,9 @@ The examples have been developed and tested with Python 3.5.1.
 - Quentin Lurkin
 - Alexis Nootens
 - Benoît Wéry
+
+## External Resources
+
+External resources that students can use to deepen their understanding of topics viewed during this course
+
+- [en] [Amit’s A* Pages - Game programming](http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html) - Introduction to pathfinding with the A* algorithm
