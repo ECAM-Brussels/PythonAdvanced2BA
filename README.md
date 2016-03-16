@@ -21,6 +21,7 @@ Some of the examples relies on external libraries:
 
 - `dispy` (4.6.10)
 - `bottle` (0.12.9)
+- `kivy` (1.9.1)
 
 The examples have been developed and tested with Python 3.5.1.
 
