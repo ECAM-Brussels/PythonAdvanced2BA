@@ -31,6 +31,7 @@ The examples have been developed and tested with Python 3.5.1.
 ## Contributors
 
 - Sébastien Combéfis
+- Paolo De Keyser
 - Quentin Lurkin
 - Alexis Nootens
 - Benoît Wéry
