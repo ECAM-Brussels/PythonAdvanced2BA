@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# kivyhelloworld.py
+# helloworld.py
 # author: Sébastien Combéfis
 # version: March 16, 2016
 
