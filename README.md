@@ -38,6 +38,7 @@ External resources that students can use to deepen their understanding of topics
 ## Contributors
 
 - Sébastien Combéfis
+- Mathieu David
 - Paolo De Keyser
 - Quentin Lurkin
 - Alexis Nootens
