@@ -1,0 +1,35 @@
+#:kivy 1.0
+# metro.kv
+# author: Sébastien Combéfis
+# version: March 16, 2016
+
+#:import App kivy.app.App
+
+MetroForm:
+    orientation: 'vertical'
+    line_input: line
+    station_input: station
+    result_output: result
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: (1,.2)
+        Label:
+            text: 'Line'
+        TextInput:
+            id: line
+            multiline: False
+        Label:
+            text: 'Station'
+        TextInput:
+            id: station
+            multiline: False
+        Button:
+            text: 'Charger'
+            on_press: root.loadschedule()
+    Label:
+        id: result
+        text: "Entrez le numéro de la ligne et de l'arrêt qui vous intéresse."
+        size_hint: (1,.8)
+        text_size: self.size
+        valign: 'middle'
+        halign: 'center'
