@@ -1,0 +1,23 @@
+#:kivy 1.0
+# movablerectangles.kv
+# author: Sébastien Combéfis
+# version: March 17, 2016
+
+MovableRectanglesForm:
+    DraggableRectangle:
+    DraggableRectangle:
+        size: (50, 50)
+        color: [0, 0.2, 0.7]
+
+<DraggableWidget>:
+    size_hint: (None, None)
+
+<DraggableRectangle>:
+    size: (100, 100)
+    color: [0.7, 0.2, 0]
+    canvas:
+        Color:
+            rgb: self.color
+        Rectangle:
+            pos: (10, 10)
+            size: (self.size[0] - 20, self.size[1] - 20)
