@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# metro.py
+# main.py
 # author: Sébastien Combéfis
 # version: March 17, 2016
 
