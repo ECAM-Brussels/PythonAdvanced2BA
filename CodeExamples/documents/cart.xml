@@ -1,0 +1,13 @@
+<library>
+    <book title="NoSQL" editor="Eyrolles" price="17.99">
+        <author name="Rudi"/>
+    </book>
+    <book title="SQL" editor="Pearson" price="21.99">
+        <author name="Ronald"/>
+        <author name="Ryan"/>
+        <author name="Arie"/>
+    </book>
+    <book title="Sabina, &#34;la juive&#34; de Jung" editor="PGdR Editions" price="10.50">
+        <author name="Alain"/>
+    </book>
+</library>
