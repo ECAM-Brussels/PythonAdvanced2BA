@@ -19,9 +19,10 @@ Code examples are organised by topics:
 
 Some of the examples relies on external libraries:
 
-- `dispy` 4.6.10 ([site web](http://dispy.sourceforge.net))
 - `bottle` 0.12.9 ([site web](http://www.bottlepy.org))
+- `dispy` 4.6.10 ([site web](http://dispy.sourceforge.net))
 - `kivy` 1.9.1 ([site web](https://kivy.org))
+- `pypdf2` 1.25.1 ([site web](https://pythonhosted.org/PyPDF2))
 
 The examples have been developed and tested with Python 3.5.1.
 
