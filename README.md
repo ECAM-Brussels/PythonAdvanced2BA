@@ -11,8 +11,10 @@ Code examples are organised by topics:
 - Abstract Data Type (ADT)
 - Artificial intelligence (AI)
 - Concurrent programming
+- Documents manipulation
 - Functional programming
 - Game programming
+- Interface programming
 - Network programming
 - Regular Expression
 - String manipulation
