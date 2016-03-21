@@ -24,6 +24,7 @@ Some of the examples relies on external libraries:
 - `kivy` 1.9.1 ([site web](https://kivy.org))
 - `openpyxl` 2.3.4 ([site web](https://openpyxl.readthedocs.org))
 - `pypdf2` 1.25.1 ([site web](https://pythonhosted.org/PyPDF2))
+- `python-docx` 0.8.5 ([site web](https://python-docx.readthedocs.org))
 
 The examples have been developed and tested with Python 3.5.1.
 
