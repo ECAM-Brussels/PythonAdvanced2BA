@@ -9,6 +9,8 @@ import zipfile
 # Creates a ZIP archive with one file inside
 with zipfile.ZipFile('data.zip', 'w') as file:
     file.write('data.txt')
+    file.write('cart.xml')
+    file.write('cart.csv')
 
 # Opens the ZIP archive to get information
 file = zipfile.ZipFile('data.zip')
