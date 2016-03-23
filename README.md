@@ -39,7 +39,8 @@ The examples have been developed and tested with Python 3.5.1.
 
 External resources that students can use to deepen their understanding of topics studied during this course:
 
-- [en] [Amit’s A* Pages - Game programming](http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html) - Introduction to pathfinding with the A* algorithm
+- [en] [Amit’s A* Pages - Game programming](http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html) : Introduction to pathfinding with the A* algorithm
+- [en] [inclem.net by Alexander Taylor](http://inclem.net) : Blog about developing with the Kivy framework for Python
 
 ## Contributors
 
