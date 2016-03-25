@@ -45,8 +45,7 @@ class TicTacToeServer(game.GameServer):
                 return state[0][0]
             if state[0][2] is not None and all(elem == state[0][2] for elem in [state[2-e][e] for e in range(3)]):
                 return state[0][2]
-            return -1
-        elif self.turns == 9:
+        if self.turns == 9:
             return None
         return -1
     
