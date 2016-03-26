@@ -1,22 +1,59 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: February 17, 2016
+# Version: March 26, 2016
 
 from abc import *
+import copy
+import json
 import socket
 
 class InvalidMoveException(Exception):
-    '''Exception representing an invalid move'''
+    '''Exception representing an invalid move.'''
     def __init__(self, message):
         super().__init__(message)
 
 
+class GameState(metaclass=ABCMeta):
+    '''Abstract class representing a generic game state.'''
+    def __init__(self, initialstate):
+        self._state = {'state': initialstate}
+    
+    def __str__(self):
+        return json.dumps(self._state, separators=(',', ':'))
+    
+    @abstractmethod
+    def winner(self):
+        '''Check whether the state is a winning state.
+        
+        Pre: -
+        Post: The returned value contains:
+              -1 if there is no winner yet (and the game is still going on);
+              None if the game ended with a draw;
+              the number of the winning player, otherwise.
+        '''
+        ...
+    
+    @abstractmethod
+    def prettyprint(self):
+        '''Print the state.
+        
+        Pre: -
+        Post: This state has been printed on stdout.'''
+        ...
+    
+    @classmethod
+    def parse(cls, state):
+        return cls(json.loads(state)['state'])
+
+
 class GameServer(metaclass=ABCMeta):
-    '''Abstract class representing a generic game server'''
-    def __init__(self, name, nbplayers, verbose=False):
+    '''Abstract class representing a generic game server.'''
+    def __init__(self, name, nbplayers, initialstate, verbose=False):
         self.__name = name
         self.__nbplayers = nbplayers
         self.__verbose = verbose
+        # Stats about the running game
+        self._state = initialstate
         self.__currentplayer = None
         self.__turns = 0
     
@@ -46,27 +83,9 @@ class GameServer(metaclass=ABCMeta):
         '''
         ...
     
-    @abstractmethod
-    def winner(self):
-        '''Check whether there is a winner.
-        
-        Pre: -
-        Post: The returned value contains:
-              -1 if there is no winner yet (and the game is still going on);
-              None if the game ended with a draw;
-              the number of the winning player, otherwise (between 0 and self.nbplayers-1).
-        '''
-        ...
-    
     @property
-    @abstractmethod
     def state(self):
-        '''Get a representation of the state.
-        
-        Pre: -
-        Post: The returned value contains a one-line string representation of the game' state.
-        '''
-        ...
+        return copy.deepcopy(self._state)
     
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,8 +134,9 @@ class GameServer(metaclass=ABCMeta):
                     print('Invalid move:', e)
                 player.send('ERROR {}'.format(e).encode())
             if self.__verbose:
-                print('State of the game:', self.state)
-            winner = self.winner()
+                print('State of the game:')
+                self._state.prettyprint()
+            winner = self._state.winner()
         # Notify players about won/lost status
         if winner != None:
             for i in range(self.nbplayers):
@@ -139,7 +159,8 @@ class GameServer(metaclass=ABCMeta):
 
 class GameClient(metaclass=ABCMeta):
     '''Abstract class representing a game client'''
-    def __init__(self, server, verbose=False):
+    def __init__(self, server, stateclass,verbose=False):
+        self.__stateclass = stateclass
         self.__verbose = verbose
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
         s = socket.socket()
@@ -163,7 +184,7 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Game started')
             elif command == 'PLAY':
-                state = data[data.index(' ')+1:]
+                state = self.__stateclass.parse(data[data.index(' ')+1:])
                 if self.__verbose:
                     print("Player's turn to play")
                     print('State of the game:', state)
