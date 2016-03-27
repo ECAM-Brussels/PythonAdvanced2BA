@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: March 26, 2016
+# Version: March 27, 2016
 
 from abc import *
 import copy
@@ -147,6 +147,9 @@ class GameServer(metaclass=ABCMeta):
         else:
             for player in self.__players:
                 player.send('END'.encode())
+        # Close the connexions with the clients
+        for player in self.__players:
+            player.close()
         if self.__verbose:
             print('Game ended')
     
@@ -202,6 +205,7 @@ class GameClient(metaclass=ABCMeta):
                         print('You lost the game')
                     else:
                         print('Game ended')
+                server.close()
             else:
                 if self.__verbose:
                     print('Specific data received:', data)
