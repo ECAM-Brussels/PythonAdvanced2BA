@@ -7,6 +7,8 @@ import copy
 import json
 import socket
 
+BUFFER_SIZE = 1024
+
 class InvalidMoveException(Exception):
     '''Exception representing an invalid move.'''
     def __init__(self, message):
@@ -103,7 +105,7 @@ class GameServer(metaclass=ABCMeta):
         try:
             for player in self.__players:
                 player.sendall('START'.encode())
-                data = player.recv(1024).decode()
+                data = player.recv(BUFFER_SIZE).decode()
                 if data != 'READY':
                     return False
         except OSError:
@@ -123,7 +125,7 @@ class GameServer(metaclass=ABCMeta):
                 print('Player', self.__currentplayer, "'s turn")
             player.sendall('PLAY {}'.format(self.state).encode())
             try:
-                move = player.recv(1024).decode()
+                move = player.recv(BUFFER_SIZE).decode()
                 if self.__verbose:
                     print('Move:', move)
                 self.applymove(move)
@@ -180,7 +182,7 @@ class GameClient(metaclass=ABCMeta):
         server = self.__server
         running = True
         while running:
-            data = server.recv(1024).decode()
+            data = server.recv(BUFFER_SIZE).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
                 server.sendall('READY'.encode())
