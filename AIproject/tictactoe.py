@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # tictactoe.py
 # Author: Sébastien Combéfis
-# Version: February 13, 2016
+# Version: March 27, 2016
 
 import argparse
 import sys
@@ -9,63 +9,72 @@ import socket
 
 from lib import game
 
+class TicTacToeState(game.GameState):
+    '''Class representing a state for the Tic-tac-toe game.'''
+    def __init__(self, initialstate=[None] * 9):
+        super().__init__(initialstate)
+    
+    def update(self, coord, player):
+        state = self._state['state']
+        line, column = coord
+        index = 3 * line + column
+        if not (0 <= line <= 2 and 0 <= column <= 2):
+            raise game.InvalidMoveException('The move is outside of the board')
+        if state[index] is not None:
+            raise game.InvalidMoveException('The specified cell is not empty')
+        state[index] = player
+    
+    def _checkelems(self, state, elems):
+        return state is not None and all(e == state for e in elems)
+    
+    def winner(self):
+        state = self._state['state']
+        # Check horizontal and vertical lines
+        for i in range(3):
+            if self._checkelems(state[3 * i], [state[3 * i + e] for e in range(3)]):
+                return state[3 * i]
+            if self._checkelems(state[i], [state[3 * e + i] for e in range(3)]):
+                return state[i]
+        # Check diagonals
+        if self._checkelems(state[0], [state[4 * e] for e in range(3)]):
+            return state[0]
+        if self._checkelems(state[2], [state[6 - 2 * e] for e in range(3)]):
+            return state[2]
+        return None if state.count(None) == 0 else -1
+    
+    def prettyprint(self):
+        data = ['X' if e == 0 else 'O' if e == 1 else '_' for e in self._state['state']]
+        result = ''
+        for i in range(3):
+            result += '{}\n'.format(' '.join(data[i * 3:i * 3 + 3]))
+        print(result)
+
+
 class TicTacToeServer(game.GameServer):
-    '''Class representing a server for the Tic-tac-toe game'''
+    '''Class representing a server for the Tic-tac-toe game.'''
     def __init__(self, verbose=False):
-        super().__init__('Tic-tac-toe', 2, verbose=verbose)
-        self.__state = [
-            [None, None, None],
-            [None, None, None],
-            [None, None, None]
-        ]
+        super().__init__('Tic-tac-toe', 2, TicTacToeState(), verbose=verbose)
     
     def applymove(self, move):
         try:
             index = int(move)
-            move = (index // 3, index % 3)
-            if not (0 <= move[0] <= 2 and 0 <= move[1] <= 2):
-                raise game.InvalidMoveException('The move is outside of the board')
-            if self.__state[move[0]][move[1]] is not None:
-                raise game.InvalidMoveException('The specified cell is not empty')
-            self.__state[move[0]][move[1]] = self.currentplayer
+            self._state.update((index // 3, index % 3), self.currentplayer)
         except:
             raise game.InvalidMoveException('A valid move must be a two-integer tuple')
-    
-    def winner(self):
-        state = self.__state
-        if self.turns >= 5:
-            # Check horizontal and vertical lines
-            for i in range(3):
-                if state[i][0] is not None and all(elem == state[i][0] for elem in state[i]):
-                    return state[i][0]
-                if state[0][i] is not None and all(elem == state[0][i] for elem in [state[e][i] for e in range(3)]):
-                    return state[0][i]
-            # Check diagonals
-            if state[0][0] is not None and all(elem == state[0][0] for elem in [state[e][e] for e in range(3)]):
-                return state[0][0]
-            if state[0][2] is not None and all(elem == state[0][2] for elem in [state[2-e][e] for e in range(3)]):
-                return state[0][2]
-        if self.turns == 9:
-            return None
-        return -1
-    
-    @property
-    def state(self):
-        return ' '.join([str(value) for row in self.__state for value in row])
+
 
 
 class TicTacToeClient(game.GameClient):
-    '''Class representing a client for the Tic-tac-toe game'''
+    '''Class representing a client for the Tic-tac-toe game.'''
     def __init__(self, name, server, verbose=False):
-        super().__init__(server, verbose=verbose)
+        super().__init__(server, TicTacToeState, verbose=verbose)
         self.__name = name
     
     def _handle(self, message):
         pass
     
     def _nextmove(self, state):
-        state = [None if value == 'None' else int(value) for value in state.split(' ')]
-        return str(state.index(None))
+        return str(state._state['state'].index(None))
 
 
 if __name__ == '__main__':

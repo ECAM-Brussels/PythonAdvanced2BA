@@ -187,7 +187,8 @@ class GameClient(metaclass=ABCMeta):
                 state = self.__stateclass.parse(data[data.index(' ')+1:])
                 if self.__verbose:
                     print("Player's turn to play")
-                    print('State of the game:', state)
+                    print('State of the game:')
+                    state.prettyprint()
                 move = self._nextmove(state)
                 if self.__verbose:
                     print('Next move:', move)
