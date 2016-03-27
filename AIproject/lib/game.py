@@ -90,7 +90,7 @@ class GameServer(metaclass=ABCMeta):
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostbyname(socket.gethostname()), 5000))
-        s.listen()
+        s.listen(self.nbplayers)
         if self.__verbose:
             print('Game server listening on {}:{}'.format(socket.gethostbyname(socket.gethostname()), 5000))
         self.__players = []
