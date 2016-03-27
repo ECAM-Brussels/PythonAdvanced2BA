@@ -102,7 +102,7 @@ class GameServer(metaclass=ABCMeta):
         # Notify players that the game started
         try:
             for player in self.__players:
-                player.send('START'.encode())
+                player.sendall('START'.encode())
                 data = player.recv(1024).decode()
                 if data != 'READY':
                     return False
@@ -121,7 +121,7 @@ class GameServer(metaclass=ABCMeta):
             player = self.__players[self.__currentplayer]
             if self.__verbose:
                 print('Player', self.__currentplayer, "'s turn")
-            player.send('PLAY {}'.format(self.state).encode())
+            player.sendall('PLAY {}'.format(self.state).encode())
             try:
                 move = player.recv(1024).decode()
                 if self.__verbose:
@@ -132,7 +132,7 @@ class GameServer(metaclass=ABCMeta):
             except InvalidMoveException as e:
                 if self.__verbose:
                     print('Invalid move:', e)
-                player.send('ERROR {}'.format(e).encode())
+                player.sendall('ERROR {}'.format(e).encode())
             if self.__verbose:
                 print('State of the game:')
                 self._state.prettyprint()
@@ -140,13 +140,13 @@ class GameServer(metaclass=ABCMeta):
         # Notify players about won/lost status
         if winner != None:
             for i in range(self.nbplayers):
-                self.__players[i].send(('WON' if winner == i else 'LOST').encode())
+                self.__players[i].sendall(('WON' if winner == i else 'LOST').encode())
             if self.__verbose:
                 print('The winner is player', winner)
         # Notify players that the game ended
         else:
             for player in self.__players:
-                player.send('END'.encode())
+                player.sendall('END'.encode())
         # Close the connexions with the clients
         for player in self.__players:
             player.close()
@@ -162,7 +162,7 @@ class GameServer(metaclass=ABCMeta):
 
 class GameClient(metaclass=ABCMeta):
     '''Abstract class representing a game client'''
-    def __init__(self, server, stateclass,verbose=False):
+    def __init__(self, server, stateclass, verbose=False):
         self.__stateclass = stateclass
         self.__verbose = verbose
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
@@ -183,7 +183,7 @@ class GameClient(metaclass=ABCMeta):
             data = server.recv(1024).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
-                server.send('READY'.encode())
+                server.sendall('READY'.encode())
                 if self.__verbose:
                     print('Game started')
             elif command == 'PLAY':
@@ -195,7 +195,7 @@ class GameClient(metaclass=ABCMeta):
                 move = self._nextmove(state)
                 if self.__verbose:
                     print('Next move:', move)
-                server.send(move.encode())
+                server.sendall(move.encode())
             elif command in ('WON', 'LOST', 'END'):
                 running = False
                 if self.__verbose:
