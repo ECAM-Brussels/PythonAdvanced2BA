@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: March 27, 2016
+# Version: March 28, 2016
 
 from abc import *
 import copy
@@ -8,6 +8,11 @@ import json
 import socket
 
 BUFFER_SIZE = 1024
+SECTION_WIDTH = 60
+
+def _printsection(title):
+    print()
+    print(' {} '.format(title).center(SECTION_WIDTH, '='))
 
 class InvalidMoveException(Exception):
     '''Exception representing an invalid move.'''
@@ -31,7 +36,7 @@ class GameState(metaclass=ABCMeta):
         Post: The returned value contains:
               -1 if there is no winner yet (and the game is still going on);
               None if the game ended with a draw;
-              the number of the winning player, otherwise.
+              or the number of the winning player, otherwise.
         '''
         ...
     
@@ -94,40 +99,62 @@ class GameServer(metaclass=ABCMeta):
         s.bind((socket.gethostbyname(socket.gethostname()), 5000))
         s.listen(self.nbplayers)
         if self.__verbose:
-            print('Game server listening on {}:{}'.format(socket.gethostbyname(socket.gethostname()), 5000))
+            _printsection('Starting {}'.format(self.name))
+            print(' Game server listening on {}:{}.'.format(socket.gethostbyname(socket.gethostname()), 5000))
+            print(' Waiting for {} players...'.format(self.nbplayers))
         self.__players = []
         # Wait for enough players for a play
-        while len(self.__players) < self.__nbplayers:
-            self.__players.append(s.accept()[0])
-            if self.__verbose:
-                print('New client connected', len(self.__players), '/', self.nbplayers)
+        try:
+            while len(self.__players) < self.__nbplayers:
+                client = s.accept()[0]
+                self.__players.append(client)
+                if self.__verbose:
+                    print(' - Client connected from {}:{} ({}/{}).'.format(*client.getpeername(), len(self.__players), self.nbplayers))
+        except KeyboardInterrupt:
+            for player in self.__players:
+                player.close()
+            _printsection('Game server ended')
+            return False
         # Notify players that the game started
         try:
-            for player in self.__players:
-                player.sendall('START'.encode())
-                data = player.recv(BUFFER_SIZE).decode()
-                if data != 'READY':
+            for i in range(len(self.__players)):
+                if self.__verbose:
+                    print(' Initialising player {}...'.format(i))
+                player = self.__players[i]
+                player.sendall('START {}'.format(i).encode())
+                data = player.recv(BUFFER_SIZE).decode().split(' ')
+                if data[0] != 'READY':
+                    if self.__verbose:
+                        print(' - Player {} not ready to start.'.format(i))
+                        _printsection('Current game ended')
                     return False
+                elif self.__verbose:
+                    print(' - Player {} ({}) ready to start.'.format(i, data[1] if len(data) == 2 else 'Anonymous'))
         except OSError:
             if self.__verbose:
-                print('Error while notifying player {}'.format(player))
+                print('Error while notifying player {}.'.format(player))
             return False
-        return True
+        # Start the game since all the players are ready
         if self.__verbose:
-            print('Game started')
+            _printsection('Game initialised (all players ready to start)')
+        return True
 
     def _gameloop(self):
         self.__currentplayer = 0
         winner = -1
+        if self.__verbose:
+            print(' Initial state:')
+            self._state.prettyprint()
+        # Loop until the game ends with a winner or with a draw
         while winner == -1:
             player = self.__players[self.__currentplayer]
             if self.__verbose:
-                print('Player', self.__currentplayer, "'s turn")
+                print("\n=> Turn #{} (player {})".format(self.turns, self.__currentplayer))
             player.sendall('PLAY {}'.format(self.state).encode())
             try:
                 move = player.recv(BUFFER_SIZE).decode()
                 if self.__verbose:
-                    print('Move:', move)
+                    print('   Move:', move)
                 self.applymove(move)
                 self.__turns += 1
                 self.__currentplayer = (self.__currentplayer + 1) % self.nbplayers
@@ -136,15 +163,17 @@ class GameServer(metaclass=ABCMeta):
                     print('Invalid move:', e)
                 player.sendall('ERROR {}'.format(e).encode())
             if self.__verbose:
-                print('State of the game:')
+                print('   State:')
                 self._state.prettyprint()
             winner = self._state.winner()
+        if self.__verbose:
+            _printsection('Game finished')
         # Notify players about won/lost status
         if winner != None:
             for i in range(self.nbplayers):
                 self.__players[i].sendall(('WON' if winner == i else 'LOST').encode())
             if self.__verbose:
-                print('The winner is player', winner)
+                print(' The winner is player {}.'.format(winner))
         # Notify players that the game ended
         else:
             for player in self.__players:
@@ -153,13 +182,11 @@ class GameServer(metaclass=ABCMeta):
         for player in self.__players:
             player.close()
         if self.__verbose:
-            print('Game ended')
+            _printsection('Game ended')
     
     def run(self):
         if self._waitplayers():
             self._gameloop()
-        elif self.__verbose:
-            print('Players not ready')
 
 
 class GameClient(metaclass=ABCMeta):
@@ -167,16 +194,18 @@ class GameClient(metaclass=ABCMeta):
     def __init__(self, server, stateclass, verbose=False):
         self.__stateclass = stateclass
         self.__verbose = verbose
+        if self.__verbose:
+            _printsection('Starting game')
         addrinfos = socket.getaddrinfo(*server, socket.AF_INET, socket.SOCK_STREAM)
         s = socket.socket()
         try:
             s.connect(addrinfos[0][4])
             if self.__verbose:
-                print('Connected to the game server on {}:{}'.format(*addrinfos[0][4]))
+                print(' Connected to the game server on {}:{}.'.format(*addrinfos[0][4]))
             self.__server = s
             self._gameloop()
         except OSError:
-            print('Impossible to connect to the game server on {}:{}'.format(*addrinfos[0][4]))
+            print(' Impossible to connect to the game server on {}:{}.'.format(*addrinfos[0][4]))
     
     def _gameloop(self):
         server = self.__server
@@ -187,26 +216,28 @@ class GameClient(metaclass=ABCMeta):
             if command == 'START':
                 server.sendall('READY'.encode())
                 if self.__verbose:
-                    print('Game started')
+                    _printsection('Game started')
             elif command == 'PLAY':
                 state = self.__stateclass.parse(data[data.index(' ')+1:])
                 if self.__verbose:
-                    print("Player's turn to play")
-                    print('State of the game:')
+                    print("\n=> Player's turn to play")
+                    print('   State:')
                     state.prettyprint()
                 move = self._nextmove(state)
                 if self.__verbose:
-                    print('Next move:', move)
+                    print('   Move:', move)
                 server.sendall(move.encode())
             elif command in ('WON', 'LOST', 'END'):
                 running = False
                 if self.__verbose:
+                    _printsection('Game finished')
                     if command == 'WON':
-                        print('You won the game')
+                        print(' You won the game.')
                     elif command == 'LOST':
-                        print('You lost the game')
+                        print(' You lost the game.')
                     else:
-                        print('Game ended')
+                        print(' It is draw.')
+                    _printsection('Game ended')
                 server.close()
             else:
                 if self.__verbose:

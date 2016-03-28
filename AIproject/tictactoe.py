@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # tictactoe.py
 # Author: Sébastien Combéfis
-# Version: March 27, 2016
+# Version: March 28, 2016
 
 import argparse
 import sys
@@ -46,8 +46,8 @@ class TicTacToeState(game.GameState):
         data = ['X' if e == 0 else 'O' if e == 1 else '_' for e in self._state['state']]
         result = ''
         for i in range(3):
-            result += '{}\n'.format(' '.join(data[i * 3:i * 3 + 3]))
-        print(result)
+            result += '   {}\n'.format(' '.join(data[i * 3:i * 3 + 3]))
+        print(result[:-1])
 
 
 class TicTacToeServer(game.GameServer):
@@ -61,7 +61,6 @@ class TicTacToeServer(game.GameServer):
             self._state.update((index // 3, index % 3), self.currentplayer)
         except:
             raise game.InvalidMoveException('A valid move must be a two-integer tuple')
-
 
 
 class TicTacToeClient(game.GameClient):
