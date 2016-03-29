@@ -7,7 +7,24 @@ import argparse
 import sys
 
 from lib import game
-
+TURN_CARDS = [
+    # (PA King, PA Knight, Cuff, PA Population/Assassins
+    (1, 6, True, 5),
+    (1, 5, False, 4),
+    (1, 6, True, 5),
+    (1, 6, True, 5),
+    (1, 5, True, 4),
+    (1, 5, False, 4),
+    (2, 7, False, 5),
+    (2, 7, False, 4),
+    (1, 6, True, 5),
+    (1, 6, True, 5),
+    (2, 7, False, 5),
+    (2, 5, False, 4),
+    (1, 5, True, 5),
+    (1, 5, False, 4),
+    (1, 5, False, 4)
+]
 KA_INITIAL_STATE = {}
 
 class KingAndAssassinsState(game.GameState):
