@@ -7,6 +7,7 @@ import argparse
 import sys
 
 from lib import game
+
 TURN_CARDS = [
     # (PA King, PA Knight, Cuff, PA Population/Assassins
     (1, 6, True, 5),
