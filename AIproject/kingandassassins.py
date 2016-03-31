@@ -26,9 +26,7 @@ CARDS = {
     (1, 5, False, 4),
     (1, 5, False, 4)
 }
-NB_CARDS = len(CARDS)
-POPULATION = {''}
-NB_PEOPLE = len(POPULATION)
+POPULATION = {'monk', 'plumwoman', 'appleman', 'hooker', 'fishwoman', 'butcher', 'blacksmith', 'shepherd', 'squire', 'carpenter', 'witchhunter', 'farmer'}
 BOARD = (
     ('R', 'R', 'R', 'R', 'R', 'G', 'G', 'R', 'R', 'R'),
     ('R', 'R', 'R', 'R', 'R', 'G', 'G', 'R', 'R', 'R'),
@@ -41,6 +39,9 @@ BOARD = (
     ('R', 'R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'),
     ('R', 'R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G')
 )
+PEOPLE = [[None for column in range(10)] for row in range(10)]
+KNIGHTS = {(1, 3), (3, 0), (7, 8), (8, 7), (8, 8), (8, 9), (9, 8)}
+VILLAGERS = {(1, 7), (2, 1), (3, 4), (3, 6), (5, 2), (5, 5), (5, 7), (5, 9), (7, 1), (7, 5), (8, 3), (9, 5)}
 KA_INITIAL_STATE = {}
 
 class KingAndAssassinsState(game.GameState):
