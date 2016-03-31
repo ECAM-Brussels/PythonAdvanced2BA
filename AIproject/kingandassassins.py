@@ -42,6 +42,11 @@ BOARD = (
 PEOPLE = [[None for column in range(10)] for row in range(10)]
 KNIGHTS = {(1, 3), (3, 0), (7, 8), (8, 7), (8, 8), (8, 9), (9, 8)}
 VILLAGERS = {(1, 7), (2, 1), (3, 4), (3, 6), (5, 2), (5, 5), (5, 7), (5, 9), (7, 1), (7, 5), (8, 3), (9, 5)}
+PEOPLE[9][9] = 'king'
+for coord in KNIGHTS:
+    PEOPLE[coord[0]][coord[1]] = 'knight'
+for villager, coord in zip(POPULATION, VILLAGERS):
+    PEOPLE[coord[0]][coord[1]] = villager
 KA_INITIAL_STATE = {}
 
 class KingAndAssassinsState(game.GameState):
@@ -63,7 +68,7 @@ class KingAndAssassinsState(game.GameState):
 class KingAndAssassinsServer(game.GameServer):
     '''Class representing a server for the King & Assassins game'''
     def __init__(self, verbose=False):
-        super().__init__('King & Assassins', 2, verbose=verbose)
+        super().__init__('King & Assassins', 2, KingAndAssassinsState(), verbose=verbose)
     
     def applymove(self, move):
         pass
