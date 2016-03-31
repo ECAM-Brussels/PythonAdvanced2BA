@@ -8,7 +8,7 @@ import sys
 
 from lib import game
 
-TURN_CARDS = [
+CARDS = {
     # (PA King, PA Knight, Cuff, PA Population/Assassins
     (1, 6, True, 5),
     (1, 5, False, 4),
@@ -25,7 +25,22 @@ TURN_CARDS = [
     (1, 5, True, 5),
     (1, 5, False, 4),
     (1, 5, False, 4)
-]
+}
+NB_CARDS = len(CARDS)
+POPULATION = {''}
+NB_PEOPLE = len(POPULATION)
+BOARD = (
+    ('R', 'R', 'R', 'R', 'R', 'G', 'G', 'R', 'R', 'R'),
+    ('R', 'R', 'R', 'R', 'R', 'G', 'G', 'R', 'R', 'R'),
+    ('R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'R'),
+    ('R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'),
+    ('R', 'G', 'G', 'G', 'G', 'R', 'R', 'G', 'G', 'G'),
+    ('G', 'G', 'G', 'G', 'G', 'R', 'R', 'G', 'G', 'G'),
+    ('R', 'R', 'G', 'G', 'G', 'R', 'R', 'G', 'G', 'G'),
+    ('R', 'R', 'G', 'G', 'G', 'R', 'R', 'G', 'G', 'G'),
+    ('R', 'R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'),
+    ('R', 'R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G')
+)
 KA_INITIAL_STATE = {}
 
 class KingAndAssassinsState(game.GameState):
