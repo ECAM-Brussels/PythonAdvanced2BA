@@ -47,7 +47,14 @@ for coord in KNIGHTS:
     PEOPLE[coord[0]][coord[1]] = 'knight'
 for villager, coord in zip(POPULATION, VILLAGERS):
     PEOPLE[coord[0]][coord[1]] = villager
-KA_INITIAL_STATE = {}
+KA_INITIAL_STATE = {
+    'board': BOARD,
+    'people': PEOPLE,
+    'castle': [(2, 2, 'N'), (4, 1, 'W')],
+    'card': None,
+    'king': 'healthy',
+    'lastopponentmoves': []
+}
 
 class KingAndAssassinsState(game.GameState):
     '''Class representing a state for the King & Assassins game.'''
