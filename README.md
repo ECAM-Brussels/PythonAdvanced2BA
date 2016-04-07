@@ -14,9 +14,11 @@ Code examples are organised by topics:
 - Documents manipulation
 - Functional programming
 - Game programming
-- Interface programming
+- Interaction with C code with Cython
+- Interface programming with Kivy
 - Network programming
 - Regular Expression
+- Scientific Computing
 - String manipulation
 
 Some of the examples relies on external libraries:
