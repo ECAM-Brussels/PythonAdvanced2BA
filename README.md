@@ -24,12 +24,17 @@ Code examples are organised by topics:
 Some of the examples relies on external libraries:
 
 - `bottle` 0.12.9 ([site web](http://www.bottlepy.org))
+- `cython` 0.23 ([site web](http://cython.org))
 - `dispy` 4.6.10 ([site web](http://dispy.sourceforge.net))
 - `kivy` 1.9.1 ([site web](https://kivy.org))
+- `matplotlib` 1.5.1 ([site web](http://matplotlib.org))
+- `numpy` 1.11.0 ([site web](http://www.numpy.org))
 - `openpyxl` 2.3.4 ([site web](https://openpyxl.readthedocs.org))
 - `pyfpdf` 1.7.2 ([site web](https://pyfpdf.readthedocs.org))
 - `pypdf2` 1.25.1 ([site web](https://pythonhosted.org/PyPDF2))
 - `python-docx` 0.8.5 ([site web](https://python-docx.readthedocs.org))
+- `scipy` 0.17.0 ([site web](http://www.scipy.org))
+- `sympy` 1.0 ([site web](http://www.sympy.org))
 
 The examples have been developed and tested with Python 3.5.1.
 
