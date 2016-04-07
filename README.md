@@ -9,6 +9,7 @@ Please look at the [course website](http://ecam-brussels.github.io/PythonAdvance
 Code examples are organised by topics:
 
 - Abstract Data Type (ADT)
+- Advanced Programming Constructions
 - Artificial intelligence (AI)
 - Concurrent programming
 - Documents manipulation
