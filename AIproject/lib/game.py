@@ -10,9 +10,11 @@ import socket
 BUFFER_SIZE = 1024
 SECTION_WIDTH = 60
 
+
 def _printsection(title):
     print()
     print(' {} '.format(title).center(SECTION_WIDTH, '='))
+
 
 class InvalidMoveException(Exception):
     '''Exception representing an invalid move.'''
@@ -24,14 +26,14 @@ class GameState(metaclass=ABCMeta):
     '''Abstract class representing a generic game state.'''
     def __init__(self, initialstate):
         self._state = {'state': initialstate}
-    
+
     def __str__(self):
         return json.dumps(self._state, separators=(',', ':'))
-    
+
     @abstractmethod
     def winner(self):
         '''Check whether the state is a winning state.
-        
+
         Pre: -
         Post: The returned value contains:
               -1 if there is no winner yet (and the game is still going on);
@@ -39,15 +41,15 @@ class GameState(metaclass=ABCMeta):
               or the number of the winning player, otherwise.
         '''
         ...
-    
+
     @abstractmethod
     def prettyprint(self):
         '''Print the state.
-        
+
         Pre: -
         Post: This state has been printed on stdout.'''
         ...
-    
+
     @classmethod
     def parse(cls, state):
         return cls(json.loads(state)['state'])
@@ -63,37 +65,37 @@ class GameServer(metaclass=ABCMeta):
         self._state = initialstate
         self.__currentplayer = None
         self.__turns = 0
-    
+
     @property
     def name(self):
         return self.__name
-    
+
     @property
     def nbplayers(self):
         return self.__nbplayers
-    
+
     @property
     def currentplayer(self):
         return self.__currentplayer
-    
+
     @property
     def turns(self):
         return self.__turns
-    
+
     @abstractmethod
     def applymove(self, move):
         '''Apply a move.
-    
+
         Pre: 'move' is valid
         Post: The specified 'move' have been applied to the game for the current player.
         Raises InvalidMoveException: If 'move' is invalid.
         '''
         ...
-    
+
     @property
     def state(self):
         return copy.deepcopy(self._state)
-    
+
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((socket.gethostbyname(socket.gethostname()), 5000))
@@ -109,7 +111,9 @@ class GameServer(metaclass=ABCMeta):
                 client = s.accept()[0]
                 self.__players.append(client)
                 if self.__verbose:
-                    print(' - Client connected from {}:{} ({}/{}).'.format(*client.getpeername(), len(self.__players), self.nbplayers))
+                    print(' - Client connected from {}:{} ({}/{}).'
+                          .format(*client.getpeername(), len(self.__players), self.nbplayers)
+                          )
         except KeyboardInterrupt:
             for player in self.__players:
                 player.close()
@@ -169,7 +173,7 @@ class GameServer(metaclass=ABCMeta):
         if self.__verbose:
             _printsection('Game finished')
         # Notify players about won/lost status
-        if winner != None:
+        if winner is not None:
             for i in range(self.nbplayers):
                 self.__players[i].sendall(('WON' if winner == i else 'LOST').encode())
             if self.__verbose:
@@ -183,7 +187,7 @@ class GameServer(metaclass=ABCMeta):
             player.close()
         if self.__verbose:
             _printsection('Game ended')
-    
+
     def run(self):
         if self._waitplayers():
             self._gameloop()
@@ -206,7 +210,7 @@ class GameClient(metaclass=ABCMeta):
             self._gameloop()
         except OSError:
             print(' Impossible to connect to the game server on {}:{}.'.format(*addrinfos[0][4]))
-    
+
     def _gameloop(self):
         server = self.__server
         running = True
@@ -243,20 +247,20 @@ class GameClient(metaclass=ABCMeta):
                 if self.__verbose:
                     print('Specific data received:', data)
                 self._handle(data)
-    
+
     @abstractmethod
     def _handle(self, command):
         '''Handle a command.
-        
+
         Pre: command != ''
         Post: The specified 'command' has been handled.
         '''
         ...
-    
+
     @abstractmethod
     def _nextmove(self, state):
         '''Get the next move to play.
-        
+
         Pre: 'state' is a valid game' state.
         Post: The returned value contains a valid move to be played by this player
               in the specified 'state' of the game.
