@@ -127,15 +127,13 @@ if __name__ == '__main__':
     server_parser = subparsers.add_parser('server', help='launch a server')
     server_parser.add_argument('--host', help='hostname (default: localhost)', default='localhost')
     server_parser.add_argument('--port', help='port to listen on (default: 5000)', default=5000)
-    server_parser.add_argument('--verbose', action='store_true')
-
+    server_parser.add_argument('-v', '--verbose', action='store_true')
     # Create the parser for the 'client' subcommand
     client_parser = subparsers.add_parser('client', help='launch a client')
     client_parser.add_argument('name', help='name of the player')
     client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default='localhost')
     client_parser.add_argument('--port', help='port of the server (default: 5000)', default=5000)
-    client_parser.add_argument('--verbose', action='store_true')
-
+    client_parser.add_argument('-v', '--verbose', action='store_true')
     # Parse the arguments of sys.args
     args = parser.parse_args()
 
