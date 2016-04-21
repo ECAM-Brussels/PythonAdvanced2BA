@@ -4,6 +4,7 @@
 # Version: March 27, 2016
 
 import argparse
+import socket
 import sys
 
 from lib import game
@@ -85,7 +86,7 @@ class KingAndAssassinsState(game.GameState):
         pass
 
     def winner(self):
-        state = self._state['state']
+        state = self._state
         pass
 
     def prettyprint(self):
@@ -131,7 +132,7 @@ if __name__ == '__main__':
     # Create the parser for the 'client' subcommand
     client_parser = subparsers.add_parser('client', help='launch a client')
     client_parser.add_argument('name', help='name of the player')
-    client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default='localhost')
+    client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default=socket.gethostbyname(socket.gethostname()))
     client_parser.add_argument('--port', help='port of the server (default: 5000)', default=5000)
     client_parser.add_argument('-v', '--verbose', action='store_true')
     # Parse the arguments of sys.args
