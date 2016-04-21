@@ -1,6 +1,6 @@
 # game.py
 # Author: Sébastien Combéfis
-# Version: March 28, 2016
+# Version: April 20, 2016
 
 from abc import *
 import copy
@@ -24,10 +24,13 @@ class InvalidMoveException(Exception):
 
 class GameState(metaclass=ABCMeta):
     '''Abstract class representing a generic game state.'''
-    def __init__(self, initialstate):
-        self._state = {'state': initialstate}
+    def __init__(self, visible, hidden=None):
+        self._state = {'visible': visible, 'hidden': hidden}
 
     def __str__(self):
+        return json.dumps(self._state['visible'], separators=(',', ':'))
+
+    def __repr__(self):
         return json.dumps(self._state, separators=(',', ':'))
 
     @abstractmethod
@@ -52,7 +55,7 @@ class GameState(metaclass=ABCMeta):
 
     @classmethod
     def parse(cls, state):
-        return cls(json.loads(state)['state'])
+        return cls(json.loads(state))
 
 
 class GameServer(metaclass=ABCMeta):
@@ -61,8 +64,8 @@ class GameServer(metaclass=ABCMeta):
         self.__name = name
         self.__nbplayers = nbplayers
         self.__verbose = verbose
-        # Stats about the running game
         self._state = initialstate
+        # Stats about the running game
         self.__currentplayer = None
         self.__turns = 0
 

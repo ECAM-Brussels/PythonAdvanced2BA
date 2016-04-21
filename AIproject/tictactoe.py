@@ -15,7 +15,7 @@ class TicTacToeState(game.GameState):
         super().__init__(initialstate)
     
     def update(self, coord, player):
-        state = self._state['state']
+        state = self._state['visible']
         line, column = coord
         index = 3 * line + column
         if not (0 <= line <= 2 and 0 <= column <= 2):
@@ -28,7 +28,7 @@ class TicTacToeState(game.GameState):
         return state is not None and all(e == state for e in elems)
     
     def winner(self):
-        state = self._state['state']
+        state = self._state['visible']
         # Check horizontal and vertical lines
         for i in range(3):
             if self._checkelems(state[3 * i], [state[3 * i + e] for e in range(3)]):
@@ -43,7 +43,7 @@ class TicTacToeState(game.GameState):
         return None if state.count(None) == 0 else -1
     
     def prettyprint(self):
-        data = ['X' if e == 0 else 'O' if e == 1 else '_' for e in self._state['state']]
+        data = ['X' if e == 0 else 'O' if e == 1 else '_' for e in self._state['visible']]
         result = ''
         for i in range(3):
             result += '   {}\n'.format(' '.join(data[i * 3:i * 3 + 3]))
@@ -73,7 +73,7 @@ class TicTacToeClient(game.GameClient):
         pass
     
     def _nextmove(self, state):
-        return str(state._state['state'].index(None))
+        return str(state._state['visible'].index(None))
 
 
 if __name__ == '__main__':
