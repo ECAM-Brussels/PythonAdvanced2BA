@@ -7,7 +7,7 @@ import copy
 import json
 import socket
 
-BUFFER_SIZE = 1024
+DEFAULT_BUFFER_SIZE = 1024
 SECTION_WIDTH = 60
 
 
@@ -56,6 +56,10 @@ class GameState(metaclass=ABCMeta):
     @classmethod
     def parse(cls, state):
         return cls(json.loads(state))
+
+    @classmethod
+    def buffersize(cls):
+        return DEFAULT_BUFFER_SIZE
 
 
 class GameServer(metaclass=ABCMeta):
@@ -130,7 +134,7 @@ class GameServer(metaclass=ABCMeta):
                     print(' Initialising player {}...'.format(i))
                 player = self.__players[i]
                 player.sendall('START {}'.format(i).encode())
-                data = player.recv(BUFFER_SIZE).decode().split(' ')
+                data = player.recv(self._state.__class__.buffersize()).decode().split(' ')
                 if data[0] != 'READY':
                     if self.__verbose:
                         print(' - Player {} not ready to start.'.format(i))
@@ -160,7 +164,7 @@ class GameServer(metaclass=ABCMeta):
                 print("\n=> Turn #{} (player {})".format(self.turns, self.__currentplayer))
             player.sendall('PLAY {}'.format(self.state).encode())
             try:
-                move = player.recv(BUFFER_SIZE).decode()
+                move = player.recv(self._state.__class__.buffersize()).decode()
                 if self.__verbose:
                     print('   Move:', move)
                 self.applymove(move)
@@ -219,7 +223,7 @@ class GameClient(metaclass=ABCMeta):
         server = self.__server
         running = True
         while running:
-            data = server.recv(BUFFER_SIZE).decode()
+            data = server.recv(self.__stateclass.buffersize()).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
                 server.sendall('READY'.encode())

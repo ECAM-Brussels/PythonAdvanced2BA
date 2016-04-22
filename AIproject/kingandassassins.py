@@ -10,6 +10,8 @@ import random
 
 from lib import game
 
+BUFFER_SIZE = 2048
+
 CARDS = {
     # (AP King, AP Knight, Fetter, AP Population/Assassins)
     (1, 6, True, 5),
@@ -100,6 +102,10 @@ class KingAndAssassinsState(game.GameState):
             result += '   | {} |\n'.format(' | '.join(['  ' if e is None else e[0:2] for e in state['people'][i]]))
             result += '   +{}\n'.format(''.join(['----+' if e == 'G' else '^^^^+' for e in state['board'][i]]))
         print(result)
+
+    @classmethod
+    def buffersize(cls):
+        return BUFFER_SIZE
 
 
 class KingAndAssassinsServer(game.GameServer):
