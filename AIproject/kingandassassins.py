@@ -6,6 +6,7 @@
 import argparse
 import socket
 import sys
+import random
 
 from lib import game
 
@@ -64,7 +65,9 @@ for coord in KNIGHTS:
     PEOPLE[coord[0]][coord[1]] = 'knight'
 
 # Place the villagers on the board
-for villager, coord in zip(POPULATION, VILLAGERS):
+# random.sample(A, len(A)) returns a list where the elements are shuffled
+# this randomizes the position of the villagers
+for villager, coord in zip(random.sample(POPULATION, len(POPULATION)), VILLAGERS):
     PEOPLE[coord[0]][coord[1]] = villager
 
 KA_INITIAL_STATE = {
@@ -79,6 +82,7 @@ KA_INITIAL_STATE = {
 
 class KingAndAssassinsState(game.GameState):
     '''Class representing a state for the King & Assassins game.'''
+
     def __init__(self, initialstate=KA_INITIAL_STATE):
         super().__init__(initialstate)
 
@@ -100,6 +104,7 @@ class KingAndAssassinsState(game.GameState):
 
 class KingAndAssassinsServer(game.GameServer):
     '''Class representing a server for the King & Assassins game'''
+
     def __init__(self, verbose=False):
         super().__init__('King & Assassins', 2, KingAndAssassinsState(), verbose=verbose)
 
@@ -109,6 +114,7 @@ class KingAndAssassinsServer(game.GameServer):
 
 class KingAndAssassinsClient(game.GameClient):
     '''Class representing a client for the King & Assassins game'''
+
     def __init__(self, name, server, verbose=False):
         super().__init__(server, KingAndAssassinsState, verbose=verbose)
         self.__name = name
@@ -137,7 +143,8 @@ if __name__ == '__main__':
     # Create the parser for the 'client' subcommand
     client_parser = subparsers.add_parser('client', help='launch a client')
     client_parser.add_argument('name', help='name of the player')
-    client_parser.add_argument('--host', help='hostname of the server (default: localhost)', default=socket.gethostbyname(socket.gethostname()))
+    client_parser.add_argument('--host', help='hostname of the server (default: localhost)',
+                               default=socket.gethostbyname(socket.gethostname()))
     client_parser.add_argument('--port', help='port of the server (default: 5000)', default=5000)
     client_parser.add_argument('-v', '--verbose', action='store_true')
     # Parse the arguments of sys.args
