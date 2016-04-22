@@ -4,8 +4,8 @@
 # Version: March 28, 2016
 
 import argparse
-import sys
 import socket
+import sys
 
 from lib import game
 
