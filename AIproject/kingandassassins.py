@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # kingandassassins.py
 # Author: Sébastien Combéfis
-# Version: March 27, 2016
+# Version: April 22, 2016
 
 import argparse
 import socket
@@ -90,7 +90,12 @@ class KingAndAssassinsState(game.GameState):
         pass
 
     def prettyprint(self):
-        pass
+        state = self._state['visible']
+        result = '   +{}\n'.format('----+' * 10)
+        for i in range(10):
+            result += '   | {} |\n'.format(' | '.join(['  ' if e is None else e[0:2] for e in state['people'][i]]))
+            result += '   +{}\n'.format(''.join(['----+' if e == 'G' else '^^^^+' for e in state['board'][i]]))
+        print(result)
 
 
 class KingAndAssassinsServer(game.GameServer):
@@ -142,3 +147,4 @@ if __name__ == '__main__':
         KingAndAssassinsServer(verbose=args.verbose).run()
     else:
         KingAndAssassinsClient(args.name, (args.host, args.port), verbose=args.verbose)
+        
