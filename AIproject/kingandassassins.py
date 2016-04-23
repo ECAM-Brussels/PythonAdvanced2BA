@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # kingandassassins.py
 # Author: Sébastien Combéfis
-# Version: April 22, 2016
+# Version: April 23, 2016
 
 import argparse
+import json
 import socket
 import sys
 import random
@@ -115,7 +116,10 @@ class KingAndAssassinsServer(game.GameServer):
         super().__init__('King & Assassins', 2, KingAndAssassinsState(), verbose=verbose)
 
     def applymove(self, move):
-        pass
+        try:
+            move = json.loads(move)
+        except:
+            raise game.InvalidMoveException('A valid move must be a dictionary')
 
 
 class KingAndAssassinsClient(game.GameClient):
@@ -129,7 +133,7 @@ class KingAndAssassinsClient(game.GameClient):
         pass
 
     def _nextmove(self, state):
-        pass
+        return json.dumps({'actions': []}, separators=(',', ':'))
 
 
 if __name__ == '__main__':
