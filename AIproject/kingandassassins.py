@@ -95,6 +95,9 @@ class KingAndAssassinsState(game.GameState):
     def winner(self):
         state = self._state
         pass
+    
+    def isinitial(self):
+        return self._state['visible']['card'] is None
 
     def prettyprint(self):
         state = self._state['visible']
@@ -117,7 +120,12 @@ class KingAndAssassinsServer(game.GameServer):
 
     def applymove(self, move):
         try:
+            state = self._state
             move = json.loads(move)
+            if state.isinitial():
+                pass
+            else:
+                pass
         except:
             raise game.InvalidMoveException('A valid move must be a dictionary')
 
@@ -133,7 +141,14 @@ class KingAndAssassinsClient(game.GameClient):
         pass
 
     def _nextmove(self, state):
-        return json.dumps({'actions': []}, separators=(',', ':'))
+        # Two possible situations:
+        # - If the player is the first to play, it has to select his/her assassins
+        # - Otherwise, it has to choose a sequence of actions
+        state = state._state['visible']
+        if state['card'] is None:
+            return json.dumps({'assassins': []}, separators=(',', ':'))
+        else:
+            return json.dumps({'actions': []}, separators=(',', ':'))
 
 
 if __name__ == '__main__':
