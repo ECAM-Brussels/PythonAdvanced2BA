@@ -79,7 +79,12 @@ KA_INITIAL_STATE = {
     'castle': [(2, 2, 'N'), (4, 1, 'W')],
     'card': None,
     'king': 'healthy',
-    'lastopponentmoves': []
+    'lastopponentmove': [],
+    'arrested': [],
+    'killed': {
+        'kings': 0,
+        'assassins': 0
+    }
 }
 
 
@@ -92,15 +97,39 @@ class KingAndAssassinsState(game.GameState):
     def update(self, moves, player):
         pass
 
+    def _getcoord(self, coord):
+        direction = {
+            'E': (0, 1),
+            'W': (0, -1),
+            'S': (1, 0),
+            'N': (-1, 0)
+        }[coord[2]]
+        return tuple(coord[i] + direction[i] for i in range(2))
+
     def winner(self):
-        state = self._state
-        pass
-    
+        visiblestate = self._state['visible']
+        hiddenstate = self._state['hidden']
+        # The king reached the castle
+        for doors in visiblestate['castle']:
+            coord = self._getcoord(doors)
+            if visiblestate['people'][coord[0]][coord[1]] == 'king':
+                return 1
+        # The are no more cards
+        if len(hiddenstate['cards']) == 0:
+            return 0
+        # The king has been killed
+        if visiblestate['king'] == 'dead':
+            return 0
+        # All the assassins have been arrested or killed
+        if visiblestate['killed']['assassins'] + len(set(visiblestate['arrested']) & hiddenstate['assassins']) == 3:
+            return 1
+        return -1
+
     def isinitial(self):
         return self._state['hidden']['assassins'] is None
     
     def setassassins(self, assassins):
-        self._state['hidden']['assassins'] = assassins
+        self._state['hidden']['assassins'] = set(assassins)
 
     def prettyprint(self):
         state = self._state['visible']
@@ -124,7 +153,7 @@ class KingAndAssassinsServer(game.GameServer):
             'assassins': None,
             'cards': random.sample(CARDS, len(CARDS))
         }
-    
+
     def _setassassins(self, move):
         state = self._state
         if 'assassins' not in move:
