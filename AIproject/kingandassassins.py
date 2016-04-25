@@ -95,7 +95,13 @@ class KingAndAssassinsState(game.GameState):
         super().__init__(initialstate)
 
     def update(self, moves, player):
-        pass
+        visiblestate = self._state['visible']
+        hiddenstate = self._state['hidden']
+        for move in moves:
+            print(move)
+        # If assassins' team just played, draw a new card
+        if player == 0:
+            visiblestate['card'] = hiddenstate['cards'].pop()
 
     def _getcoord(self, coord):
         direction = {
@@ -166,6 +172,7 @@ class KingAndAssassinsServer(game.GameServer):
             if not assassin in POPULATION:
                 raise game.InvalidMoveException('Unknown villager: {}'.format(assassin))
         state.setassassins(move['assassins'])
+        state.update([], 0)
 
     def applymove(self, move):
         try:
