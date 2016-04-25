@@ -99,6 +99,21 @@ class KingAndAssassinsState(game.GameState):
         hidden = self._state['hidden']
         for move in moves:
             print(move)
+            # ('move', x, y, n, dir): moves person at position (x,y) of n cells in direction dir
+            if move[0] == 'move':
+                pass
+            # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
+            elif move[0] == 'arrest':
+                pass
+            # ('kill', x, y, dir): kills the assassin/knight in direction dir with knight/assassin at position (x, y)
+            elif move[0] == 'kill':
+                pass
+            # ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
+            elif move[0] == 'attack':
+                pass
+            # ('reveal', x, y): reveals villager at position (x,y) as an assassin
+            elif move[0] == 'reveal':
+                pass
         # If assassins' team just played, draw a new card
         if player == 0:
             visible['card'] = hidden['cards'].pop()
@@ -200,7 +215,14 @@ class KingAndAssassinsClient(game.GameClient):
     def _nextmove(self, state):
         # Two possible situations:
         # - If the player is the first to play, it has to select his/her assassins
+        #   The move is a dictionary with a key 'assassins' whose value is a list of villagers' names
         # - Otherwise, it has to choose a sequence of actions
+        #   The possible actions are:
+        #   ('move', x, y, n, dir): moves person at position (x,y) of n cells in direction dir
+        #   ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
+        #   ('kill', x, y, dir): kills the assassin/knight in direction dir with knight/assassin at position (x, y)
+        #   ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
+        #   ('reveal', x, y): reveals villager at position (x,y) as an assassin
         state = state._state['visible']
         if state['card'] is None:
             return json.dumps({'assassins': ['monk', 'hooker', 'fishwoman']}, separators=(',', ':'))
