@@ -5,9 +5,9 @@
 
 import argparse
 import json
+import random
 import socket
 import sys
-import random
 
 from lib import game
 
@@ -97,7 +97,10 @@ class KingAndAssassinsState(game.GameState):
         pass
     
     def isinitial(self):
-        return self._state['visible']['card'] is None
+        return self._state['hidden']['assassins'] is None
+    
+    def setassassins(self, assassins):
+        self._state['hidden']['assassins'] = assassins
 
     def prettyprint(self):
         state = self._state['visible']
@@ -117,16 +120,34 @@ class KingAndAssassinsServer(game.GameServer):
 
     def __init__(self, verbose=False):
         super().__init__('King & Assassins', 2, KingAndAssassinsState(), verbose=verbose)
+        self._state._state['hidden'] = {
+            'assassins': None,
+            'cards': random.sample(CARDS, len(CARDS))
+        }
+    
+    def _setassassins(self, move):
+        state = self._state
+        if 'assassins' not in move:
+            raise game.InvalidMoveException('The dictionary must contain an "assassins" key')
+        if not isinstance(move['assassins'], list):
+            raise game.InvalidMoveException('The value of the "assassins" key must be a list')
+        for assassin in move['assassins']:
+            if not isinstance(assassin, str):
+                raise game.InvalidMoveException('The "assassins" must be identified by their name')
+            if not assassin in POPULATION:
+                raise game.InvalidMoveException('Unknown villager: {}'.format(assassin))
+        state.setassassins(move['assassins'])
 
     def applymove(self, move):
         try:
             state = self._state
             move = json.loads(move)
             if state.isinitial():
-                pass
+                self._setassassins(move)
             else:
                 pass
-        except:
+        except Exception as e:
+            print(e)
             raise game.InvalidMoveException('A valid move must be a dictionary')
 
 
@@ -146,7 +167,7 @@ class KingAndAssassinsClient(game.GameClient):
         # - Otherwise, it has to choose a sequence of actions
         state = state._state['visible']
         if state['card'] is None:
-            return json.dumps({'assassins': []}, separators=(',', ':'))
+            return json.dumps({'assassins': ['monk', 'hooker', 'fishwoman']}, separators=(',', ':'))
         else:
             return json.dumps({'actions': []}, separators=(',', ':'))
 
