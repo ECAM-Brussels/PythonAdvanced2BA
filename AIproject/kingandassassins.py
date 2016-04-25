@@ -95,13 +95,13 @@ class KingAndAssassinsState(game.GameState):
         super().__init__(initialstate)
 
     def update(self, moves, player):
-        visiblestate = self._state['visible']
-        hiddenstate = self._state['hidden']
+        visible = self._state['visible']
+        hidden = self._state['hidden']
         for move in moves:
             print(move)
         # If assassins' team just played, draw a new card
         if player == 0:
-            visiblestate['card'] = hiddenstate['cards'].pop()
+            visible['card'] = hidden['cards'].pop()
 
     def _getcoord(self, coord):
         direction = {
@@ -113,21 +113,21 @@ class KingAndAssassinsState(game.GameState):
         return tuple(coord[i] + direction[i] for i in range(2))
 
     def winner(self):
-        visiblestate = self._state['visible']
-        hiddenstate = self._state['hidden']
+        visible = self._state['visible']
+        hidden = self._state['hidden']
         # The king reached the castle
-        for doors in visiblestate['castle']:
+        for doors in visible['castle']:
             coord = self._getcoord(doors)
-            if visiblestate['people'][coord[0]][coord[1]] == 'king':
+            if visible['people'][coord[0]][coord[1]] == 'king':
                 return 1
         # The are no more cards
-        if len(hiddenstate['cards']) == 0:
+        if len(hidden['cards']) == 0:
             return 0
         # The king has been killed
-        if visiblestate['king'] == 'dead':
+        if visible['king'] == 'dead':
             return 0
         # All the assassins have been arrested or killed
-        if visiblestate['killed']['assassins'] + len(set(visiblestate['arrested']) & hiddenstate['assassins']) == 3:
+        if visible['killed']['assassins'] + len(set(visible['arrested']) & hidden['assassins']) == 3:
             return 1
         return -1
 
