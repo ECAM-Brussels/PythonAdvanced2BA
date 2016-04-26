@@ -13,7 +13,7 @@ from lib import game
 
 BUFFER_SIZE = 2048
 
-CARDS = {
+CARDS = (
     # (AP King, AP Knight, Fetter, AP Population/Assassins)
     (1, 6, True, 5),
     (1, 5, False, 4),
@@ -30,7 +30,7 @@ CARDS = {
     (1, 5, True, 5),
     (1, 5, False, 4),
     (1, 5, False, 4)
-}
+)
 
 POPULATION = {
     'monk', 'plumwoman', 'appleman', 'hooker', 'fishwoman', 'butcher',
