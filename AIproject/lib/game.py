@@ -6,6 +6,7 @@ from abc import *
 import copy
 import json
 import socket
+import sys
 
 DEFAULT_BUFFER_SIZE = 1024
 SECTION_WIDTH = 60
@@ -226,9 +227,11 @@ class GameClient(metaclass=ABCMeta):
             data = server.recv(self.__stateclass.buffersize()).decode()
             command = data[:data.index(' ')] if ' ' in data else data
             if command == 'START':
+                self._playernb = int(data[data.index(' '):])
                 server.sendall('READY'.encode())
                 if self.__verbose:
                     _printsection('Game started')
+                    print("   Player's number: {}".format(self._playernb))
             elif command == 'PLAY':
                 state = self.__stateclass.parse(data[data.index(' ')+1:])
                 if self.__verbose:
