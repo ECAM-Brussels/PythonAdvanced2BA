@@ -236,7 +236,14 @@ class KingAndAssassinsClient(game.GameClient):
         if state['card'] is None:
             return json.dumps({'assassins': ['monk', 'hooker', 'fishwoman']}, separators=(',', ':'))
         else:
-            return json.dumps({'actions': []}, separators=(',', ':'))
+            if self._playernb == 0:
+                for i in range(10):
+                    for j in range(10):
+                        if state['people'][i][j] in {'monk', 'hooker', 'fishwoman'}:
+                            return json.dumps({'actions': [('reveal', i, j)]}, separators=(',', ':'))
+                return json.dumps({'actions': []}, separators=(',', ':'))
+            else:
+                return json.dumps({'actions': []}, separators=(',', ':'))
 
 
 if __name__ == '__main__':
