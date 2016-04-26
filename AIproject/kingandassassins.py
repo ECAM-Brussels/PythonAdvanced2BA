@@ -160,11 +160,19 @@ class KingAndAssassinsState(game.GameState):
         self._state['hidden']['assassins'] = set(assassins)
 
     def prettyprint(self):
-        state = self._state['visible']
-        result = '   +{}\n'.format('----+' * 10)
+        visible = self._state['visible']
+        hidden = self._state['hidden']
+        result = ''
+        if hidden is not None:
+            result += '   - Assassins: {}\n'.format(hidden['assassins'])
+            result += '   - Remaining cards: {}\n'.format(len(hidden['cards']))
+        result += '   - Current card: {}\n'.format(visible['card'])
+        result += '   - King: {}\n'.format(visible['king'])
+        result += '   - People:\n'
+        result += '   +{}\n'.format('----+' * 10)
         for i in range(10):
-            result += '   | {} |\n'.format(' | '.join(['  ' if e is None else e[0:2] for e in state['people'][i]]))
-            result += '   +{}\n'.format(''.join(['----+' if e == 'G' else '^^^^+' for e in state['board'][i]]))
+            result += '   | {} |\n'.format(' | '.join(['  ' if e is None else e[0:2] for e in visible['people'][i]]))
+            result += '   +{}\n'.format(''.join(['----+' if e == 'G' else '^^^^+' for e in visible['board'][i]]))
         print(result)
 
     @classmethod
