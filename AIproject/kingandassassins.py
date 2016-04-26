@@ -97,6 +97,7 @@ class KingAndAssassinsState(game.GameState):
     def update(self, moves, player):
         visible = self._state['visible']
         hidden = self._state['hidden']
+        people = visible['people']
         for move in moves:
             print(move)
             # ('move', x, y, n, dir): moves person at position (x,y) of n cells in direction dir
@@ -113,7 +114,13 @@ class KingAndAssassinsState(game.GameState):
                 pass
             # ('reveal', x, y): reveals villager at position (x,y) as an assassin
             elif move[0] == 'reveal':
-                pass
+                if player != 0:
+                    raise game.InvalidMoveException('raise action only possible for player 0')
+                coord = (int(move[1]), int(move[2]))
+                p = people[coord[0]][coord[1]]
+                if p not in hidden['assassins']:
+                    raise game.InvalidMoveException('{}: the specified villager is not an assassin'.format(move))
+                people[coord[0]][coord[1]] = 'assassin'
         # If assassins' team just played, draw a new card
         if player == 0:
             visible['card'] = hidden['cards'].pop()
@@ -196,7 +203,9 @@ class KingAndAssassinsServer(game.GameServer):
             if state.isinitial():
                 self._setassassins(move)
             else:
-                pass
+                self._state.update(move['actions'], self.currentplayer)
+        except game.InvalidMoveException as e:
+            raise e
         except Exception as e:
             print(e)
             raise game.InvalidMoveException('A valid move must be a dictionary')
