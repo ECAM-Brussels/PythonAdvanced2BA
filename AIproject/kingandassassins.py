@@ -136,7 +136,7 @@ class KingAndAssassinsState(game.GameState):
                 if attacker != 'assassin':
                     raise game.InvalidMoveException('{}: the attacker is not an assassin'.format(move))
                 tx, ty = self._getcoord((x, y, d))
-                target = people[tx][tx]
+                target = people[tx][ty]
                 if target != 'king':
                     raise game.InvalidMoveException('{}: only the king can be attacked'.format(move))
                 visible['king'] = 'injured' if visible['king'] == 'healthy' else 'dead'
