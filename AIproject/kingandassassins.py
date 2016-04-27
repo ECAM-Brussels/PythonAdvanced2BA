@@ -90,6 +90,13 @@ KA_INITIAL_STATE = {
 
 class KingAndAssassinsState(game.GameState):
     '''Class representing a state for the King & Assassins game.'''
+    
+    DIRECTIONS = {
+        'E': (0, 1),
+        'W': (0, -1),
+        'S': (1, 0),
+        'N': (-1, 0)
+    }
 
     def __init__(self, initialstate=KA_INITIAL_STATE):
         super().__init__(initialstate)
@@ -126,13 +133,7 @@ class KingAndAssassinsState(game.GameState):
             visible['card'] = hidden['cards'].pop()
 
     def _getcoord(self, coord):
-        direction = {
-            'E': (0, 1),
-            'W': (0, -1),
-            'S': (1, 0),
-            'N': (-1, 0)
-        }[coord[2]]
-        return tuple(coord[i] + direction[i] for i in range(2))
+        return tuple(coord[i] + KingAndAssassinsState.DIRECTIONS[coord[2]][i] for i in range(2))
 
     def winner(self):
         visible = self._state['visible']
