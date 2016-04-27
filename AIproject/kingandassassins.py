@@ -118,7 +118,17 @@ class KingAndAssassinsState(game.GameState):
                 pass
             # ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
             elif move[0] == 'attack':
-                pass
+                if player != 0:
+                    raise game.InvalidMoveException('attack action only possible for player 0')
+                x, y, d = int(move[1]), int(move[2]), move[3]
+                attacker = people[x][y]
+                if attacker != 'assassin':
+                    raise game.InvalidMoveException('{}: the attacker is not an assassin'.format(move))
+                tx, ty = self._getcoord((x, y, d))
+                target = people[tx][tx]
+                if target != 'king':
+                    raise game.InvalidMoveException('{}: only the king can be attacked'.format(move))
+                visible['king'] = 'injured' if visible['king'] == 'healthy' else 'dead'
             # ('reveal', x, y): reveals villager at position (x,y) as an assassin
             elif move[0] == 'reveal':
                 if player != 0:
