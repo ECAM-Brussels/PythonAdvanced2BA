@@ -123,11 +123,11 @@ class KingAndAssassinsState(game.GameState):
             elif move[0] == 'reveal':
                 if player != 0:
                     raise game.InvalidMoveException('raise action only possible for player 0')
-                coord = (int(move[1]), int(move[2]))
-                p = people[coord[0]][coord[1]]
+                x, y = int(move[1]), int(move[2])
+                p = people[x][y]
                 if p not in hidden['assassins']:
                     raise game.InvalidMoveException('{}: the specified villager is not an assassin'.format(move))
-                people[coord[0]][coord[1]] = 'assassin'
+                people[x][y] = 'assassin'
         # If assassins' team just played, draw a new card
         if player == 0:
             visible['card'] = hidden['cards'].pop()
