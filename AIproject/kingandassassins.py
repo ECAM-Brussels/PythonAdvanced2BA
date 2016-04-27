@@ -112,7 +112,18 @@ class KingAndAssassinsState(game.GameState):
                 pass
             # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
             elif move[0] == 'arrest':
-                pass
+                if player != 1:
+                    raise game.InvalidMoveException('arrest action only possible for player 1')
+                x, y, d = int(move[1]), int(move[2]), move[3]
+                arrester = people[x][y]
+                if arrester != 'knight':
+                    raise game.InvalidMoveException('{}: the attacker is not a knight'.format(move))
+                tx, ty = self._getcoord((x, y, d))
+                target = people[tx][ty]
+                if target not in POPULATION:
+                    raise game.InvalidMoveException('{}: only villagers can be arrested'.format(move))
+                visible['arrested'].append(people[tx][ty])
+                people[tx][ty] = None
             # ('kill', x, y, dir): kills the assassin/knight in direction dir with knight/assassin at position (x, y)
             elif move[0] == 'kill':
                 pass
