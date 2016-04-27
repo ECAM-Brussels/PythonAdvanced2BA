@@ -107,7 +107,7 @@ class KingAndAssassinsState(game.GameState):
         people = visible['people']
         for move in moves:
             print(move)
-            # ('move', x, y, n, dir): moves person at position (x,y) of n cells in direction dir
+            # ('move', x, y, dir): moves person at position (x,y) of one cell in direction dir
             if move[0] == 'move':
                 pass
             # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
@@ -257,7 +257,7 @@ class KingAndAssassinsClient(game.GameClient):
         #   The move is a dictionary with a key 'assassins' whose value is a list of villagers' names
         # - Otherwise, it has to choose a sequence of actions
         #   The possible actions are:
-        #   ('move', x, y, n, dir): moves person at position (x,y) of n cells in direction dir
+        #   ('move', x, y, dir): moves person at position (x,y) of one cell in direction dir
         #   ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
         #   ('kill', x, y, dir): kills the assassin/knight in direction dir with knight/assassin at position (x, y)
         #   ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
