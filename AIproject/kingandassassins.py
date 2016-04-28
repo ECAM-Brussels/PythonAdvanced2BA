@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # kingandassassins.py
 # Author: Sébastien Combéfis
-# Version: April 23, 2016
+# Version: April 28, 2016
 
 import argparse
 import json
@@ -109,6 +109,10 @@ class KingAndAssassinsState(game.GameState):
             print(move)
             # ('move', x, y, dir): moves person at position (x,y) of one cell in direction dir
             if move[0] == 'move':
+                x, y, d = int(move[1]), int(move[2]), move[3]
+                p = people[x][y]
+                if p is None:
+                    raise game.InvalidMoveException('{}: there is no one to move'.format(move))
                 pass
             # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
             elif move[0] == 'arrest':
