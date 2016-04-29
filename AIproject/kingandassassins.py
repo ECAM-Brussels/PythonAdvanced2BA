@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # kingandassassins.py
 # Author: Sébastien Combéfis
-# Version: April 28, 2016
+# Version: April 29, 2016
 
 import argparse
 import json
