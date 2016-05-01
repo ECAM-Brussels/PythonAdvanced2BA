@@ -82,7 +82,7 @@ KA_INITIAL_STATE = {
     'lastopponentmove': [],
     'arrested': [],
     'killed': {
-        'kings': 0,
+        'knights': 0,
         'assassins': 0
     }
 }
@@ -120,7 +120,7 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
                 if p == 'king' and BOARD[nx][ny] == 'R':
                     raise game.InvalidMoveException('{}: the king cannot move on a roof'.format(move))
-                if p in {'assassins'} + POPULATION and player != 0:
+                if p in {'assassin'} + POPULATION and player != 0:
                     raise game.InvalidMoveException('{}: villagers and assassins can only be moved by player 0'.format(move))
                 if p in {'king', 'knight'} and player != 1:
                     raise game.InvalidMoveException('{}: the king and knights can only be moved by player 1'.format(move))
@@ -146,7 +146,24 @@ class KingAndAssassinsState(game.GameState):
                 people[tx][ty] = None
             # ('kill', x, y, dir): kills the assassin/knight in direction dir with knight/assassin at position (x, y)
             elif move[0] == 'kill':
-                pass
+                x, y, d = int(move[1]), int(move[2]), move[3]
+                killer = people[x][y]
+                if killer == 'assassin' and player != 0:
+                    raise game.InvalidMoveException('{}: kill action for assassin only possible for player 0'.format(move))
+                if killer == 'knight' and player != 1:
+                    raise game.InvalidMoveException('{}: kill action for knight only possible for player 1'.format(move))
+                tx, ty = self._getcoord((x, y, d))
+                target = people[tx][ty]
+                if target is None:
+                    raise game.InvalidMoveException('{}: there is no one to kill'.format(move))
+                if killer == 'assassin' and target == 'knight':
+                    visible['killed']['knights'] += 1
+                    people[tx][tx] = None
+                elif killer == 'knight' and target == 'assassin':
+                    visible['killed']['assassins'] += 1
+                    people[tx][tx] = None
+                else:
+                    raise game.InvalidMoveException('{}: forbidden kill'.format(move))
             # ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
             elif move[0] == 'attack':
                 if player != 0:
