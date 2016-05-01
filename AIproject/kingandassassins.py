@@ -120,6 +120,10 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
                 if p == 'king' and BOARD[nx][ny] == 'R':
                     raise game.InvalidMoveException('{}: the king cannot move on a roof'.format(move))
+                if p in {'assassins'} + POPULATION and player != 0:
+                    raise game.InvalidMoveException('{}: villagers and assassins can only be moved by player 0'.format(move))
+                if p in {'king', 'knight'} and player != 1:
+                    raise game.InvalidMoveException('{}: the king and knights can only be moved by player 1'.format(move))
                 # Move granted if cell is free
                 if new is None:
                     people[x][y], people[nx][ny] = people[nx][ny], people[x][y]
