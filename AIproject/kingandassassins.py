@@ -113,7 +113,19 @@ class KingAndAssassinsState(game.GameState):
                 p = people[x][y]
                 if p is None:
                     raise game.InvalidMoveException('{}: there is no one to move'.format(move))
-                pass
+                nx, ny = self._getcoord((x, y, d))
+                new = people[nx][ny]
+                # King, assassins, villagers can only move on a free cell
+                if p != 'knight' and new is not None:
+                    raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
+                if p == 'king' and BOARD[nx][ny] == 'R':
+                    raise game.InvalidMoveException('{}: the king cannot move on a roof'.format(move))
+                # Move granted if cell is free
+                if new is None:
+                    people[x][y], people[nx][ny] = people[nx][ny], people[x][y]
+                # If cell is not free, check if the knight can push villagers
+                else:
+                    pass
             # ('arrest', x, y, dir): arrests the villager in direction dir with knight at position (x, y)
             elif move[0] == 'arrest':
                 if player != 1:
