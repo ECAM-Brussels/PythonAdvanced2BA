@@ -100,6 +100,9 @@ class KingAndAssassinsState(game.GameState):
 
     def __init__(self, initialstate=KA_INITIAL_STATE):
         super().__init__(initialstate)
+    
+    def _nextfree(self, x, y, dir):
+        nx, ny = self._getcoord((x, y, dir))
 
     def update(self, moves, player):
         visible = self._state['visible']
