@@ -19,12 +19,14 @@ def _printsection(title):
 
 class InvalidMoveException(Exception):
     '''Exception representing an invalid move.'''
+
     def __init__(self, message):
         super().__init__(message)
 
 
 class GameState(metaclass=ABCMeta):
     '''Abstract class representing a generic game state.'''
+
     def __init__(self, visible, hidden=None):
         self._state = {'visible': visible, 'hidden': hidden}
 
@@ -65,6 +67,7 @@ class GameState(metaclass=ABCMeta):
 
 class GameServer(metaclass=ABCMeta):
     '''Abstract class representing a generic game server.'''
+
     def __init__(self, name, nbplayers, initialstate, verbose=False):
         self.__name = name
         self.__nbplayers = nbplayers
@@ -162,7 +165,7 @@ class GameServer(metaclass=ABCMeta):
         while winner == -1:
             player = self.__players[self.__currentplayer]
             if self.__verbose:
-                print("\n=> Turn #{} (player {})".format(self.turns, self.__currentplayer))
+                print("\n=> Turn #{} (player {})".format(self.turns // self.nbplayers, self.__currentplayer))
             player.sendall('PLAY {}'.format(self.state).encode())
             try:
                 move = player.recv(self._state.__class__.buffersize()).decode()
@@ -204,6 +207,7 @@ class GameServer(metaclass=ABCMeta):
 
 class GameClient(metaclass=ABCMeta):
     '''Abstract class representing a game client'''
+
     def __init__(self, server, stateclass, verbose=False):
         self.__stateclass = stateclass
         self.__verbose = verbose
@@ -233,7 +237,7 @@ class GameClient(metaclass=ABCMeta):
                     _printsection('Game started')
                     print("   Player's number: {}".format(self._playernb))
             elif command == 'PLAY':
-                state = self.__stateclass.parse(data[data.index(' ')+1:])
+                state = self.__stateclass.parse(data[data.index(' ') + 1:])
                 if self.__verbose:
                     print("\n=> Player's turn to play")
                     print('   State:')
