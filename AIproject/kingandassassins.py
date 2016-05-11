@@ -131,6 +131,12 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: there is no one to move'.format(move))
                 nx, ny = self._getcoord((x, y, d))
                 new = people[nx][ny]
+
+                #King can enter the castle
+                if p == 'king' and ((x, y, d) == visible['castle'][0] or (x, y, d) == visible['castle'][1]):
+                    people[nx][ny]='king'
+                    continue
+                    
                 # King, assassins, villagers can only move on a free cell
                 if p != 'knight' and new is not None:
                     raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
