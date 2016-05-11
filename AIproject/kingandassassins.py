@@ -136,7 +136,7 @@ class KingAndAssassinsState(game.GameState):
                 if p == 'king' and ((x, y, d) == visible['castle'][0] or (x, y, d) == visible['castle'][1]):
                     people[nx][ny]='king'
                     continue
-                    
+
                 # King, assassins, villagers can only move on a free cell
                 if p != 'knight' and new is not None:
                     raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
@@ -151,7 +151,7 @@ class KingAndAssassinsState(game.GameState):
                     people[x][y], people[nx][ny] = people[nx][ny], people[x][y]
                 # If cell is not free, check if the knight can push villagers
                 else:
-                    nf = self._nextfree((x, y, d))
+                    nf = self._nextfree(x, y, d)
                     if nf is None:
                         raise game.InvalidMoveException('{}: cannot move-and-push in the given direction'.format(move))
                     nfx, nfy = nf
