@@ -305,8 +305,9 @@ class KingAndAssassinsClient(game.GameClient):
     '''Class representing a client for the King & Assassins game'''
 
     def __init__(self, name, server, verbose=False):
-        super().__init__(server, KingAndAssassinsState, verbose=verbose)
         self.__name = name
+        super().__init__(server, KingAndAssassinsState, verbose=verbose)
+        # Nothing happen after super.__init__
 
     def _handle(self, message):
         pass
