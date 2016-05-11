@@ -181,10 +181,10 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: there is no one to kill'.format(move))
                 if killer == 'assassin' and target == 'knight':
                     visible['killed']['knights'] += 1
-                    people[tx][tx] = None
+                    people[tx][ty] = None
                 elif killer == 'knight' and target == 'assassin':
                     visible['killed']['assassins'] += 1
-                    people[tx][tx] = None
+                    people[tx][ty] = None
                 else:
                     raise game.InvalidMoveException('{}: forbidden kill'.format(move))
             # ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
