@@ -107,11 +107,11 @@ class GameServer(metaclass=ABCMeta):
     def _waitplayers(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((socket.gethostbyname(socket.gethostname()), 5000))
+        s.bind(('0.0.0.0', 5000))
         s.listen(self.nbplayers)
         if self.__verbose:
             _printsection('Starting {}'.format(self.name))
-            print(' Game server listening on {}:{}.'.format(socket.gethostbyname(socket.gethostname()), 5000))
+            print(' Game server listening on port {}.'.format(5000))
             print(' Waiting for {} players...'.format(self.nbplayers))
         self.__players = []
         # Wait for enough players for a play
