@@ -6,12 +6,32 @@
 import argparse
 import socket
 import sys
+import json
 
 from lib import game
 
 class PylosState(game.GameState):
     '''Class representing a state for the Pylos game.'''
-    def __init__(self, initialstate=[None] * 9):
+    def __init__(self):
+        
+        # define a layer of the board
+        def squareMatrix(size):
+            matrix = []
+            for i in range(size):
+                matrix.push([None]*size)
+            return matrix
+
+        board = []
+        for i in range(4):
+            board.push(squareMatrix(4-i))
+
+        initialstate = {
+            'board': board,
+            'dark': 15,
+            'light': 15,
+            'turn': 'light'
+        }
+
         super().__init__(initialstate)
     
     # update the state with the move
@@ -49,7 +69,32 @@ class TicTacToeClient(game.GameClient):
     
     #return move as string
     def _nextmove(self, state):
-        return ""
+        ''' example of moves
+        move = {
+            'move': 'place',
+            'to': [0,1,1]
+        }
+
+        move = {
+            'move': 'move',
+            'from': [0,1,1],
+            'to': [1,1,1]
+        }
+
+        move = {
+            'move': 'move',
+            'from': [0,1,1],
+            'to': [1,1,1]
+            'remove': [
+                [1,1,1],
+                [1,1,2]
+            ]
+        }
+        
+        return it in JSON'''
+        
+        move = {}
+        return json.dumps(move)
 
 
 if __name__ == '__main__':
