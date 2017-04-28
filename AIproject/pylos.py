@@ -12,42 +12,140 @@ from lib import game
 
 class PylosState(game.GameState):
     '''Class representing a state for the Pylos game.'''
-    def __init__(self):
+    def __init__(self, initialstate=None):
         
-        # define a layer of the board
-        def squareMatrix(size):
-            matrix = []
-            for i in range(size):
-                matrix.push([None]*size)
-            return matrix
+        if initialstate == None:
+            # define a layer of the board
+            def squareMatrix(size):
+                matrix = []
+                for i in range(size):
+                    matrix.append([None]*size)
+                return matrix
 
-        board = []
-        for i in range(4):
-            board.push(squareMatrix(4-i))
+            board = []
+            for i in range(4):
+                board.append(squareMatrix(4-i))
 
-        initialstate = {
-            'board': board,
-            'dark': 15,
-            'light': 15,
-            'turn': 'light'
-        }
+            initialstate = {
+                'board': board,
+                'reserve': [15, 15],
+                'turn': 0
+            }
 
         super().__init__(initialstate)
-    
+
+    def inBoard(self, layer, row, column):
+        return layer in range(4) and row in range(4-layer) and column in range(4-layer)
+
+    def get(self, layer, row, column):
+        if(not self.inBoard(layer, row, column)):
+            raise game.InvalidMoveException('The position ({}) is outside of the board'.format(coord))
+        #print(json.dumps(self._state, indent=4))
+        return self._state['visible']['board'][layer][row][column]
+
+    def safeGet(self, layer, row, column):
+        try:
+            return self.get(layer, row, column)
+        except game.InvalidMoveException:
+            return None
+
+    def validPosition(self, coord):
+        layer, row, column = tuple(coord)
+        if self.get(layer, row, column) != None:
+            raise game.InvalidMoveException('The position ({}) is not free'.format(coord))
+
+        if layer > 0:
+            if (
+                self.get(layer-1, row, column) == None or
+                self.get(layer-1, row+1, column) == None or
+                self.get(layer-1, row+1, column+1) == None or
+                self.get(layer-1, row, column+1) == None
+            ):
+                raise game.InvalidMoveException('The position ({}) is not stable'.format(coord))
+
+    def canMove(self, coord):
+        layer, row, column = tuple(coord)
+        if self.get(layer, row, column) == None:
+            raise game.InvalidMoveException('The position ({}) is empty'.format(coord))
+
+        if layer < 3:
+            if (
+                self.safeGet(layer+1, row, column) != None or
+                self.safeGet(layer+1, row-1, column) != None or
+                self.safeGet(layer+1, row-1, column-1) != None or
+                self.safeGet(layer+1, row, column-1) != None
+            ):
+                raise game.InvalidMoveException('The position ({}) is not movable'.format(coord))
+
+    def createSquare(self, coord):
+        layer, row, column = tuple(coord)
+
+        def isSquare(layer, row, column):
+            if (
+                self.safeGet(layer, row, column) != None and
+                self.safeGet(layer, row+1, column) == self.safeGet(layer, row, column) and
+                self.safeGet(layer, row+1, column+1) == self.safeGet(layer, row, column) and
+                self.safeGet(layer, row, column+1) == self.safeGet(layer, row, column)
+            ):
+                return True
+            return False
+
+        if (
+            isSquare(layer, row, column) or
+            isSquare(layer, row-1, column) or
+            isSquare(layer, row-1, column-1) or
+            isSquare(layer, row, column-1)
+        ):
+            return True
+        return False
+
+    def set(self, coord, value):
+        layer, row, column = tuple(coord)
+        self.validPosition(coord)
+        self._state['visible']['board'][layer][row][column] = value
+
+    def remove(self, coord):
+        layer, row, column = tuple(coord)
+        self.canMove(coord)
+        self._state['visible']['board'][layer][row][column] = None
+        
     # update the state with the move
     # raise game.InvalidMoveException
     def update(self, move, player):
         state = self._state['visible']
+        if move['move'] == 'place':
+            if state['reserve'][player] < 1:
+                raise game.InvalidMoveException('no more sphere')
+            self.set(move['to'], player)
+            state['reserve'][player] -= 1
+        elif move['move'] == 'move':
+            self.remove(move['from'])
+            self.set(move['to'], player)
+        else:
+            raise game.InvalidMoveException('Invalid Move:\n{}'.format(move))
+
+        if 'remove' in move:
+            if not self.createSquare(move['to']):
+                raise game.InvalidMoveException('You cannot remove spheres')
+            if len(move['remove']) > 2:
+                raise game.InvalidMoveException('Can\'t remove more than 2 spheres')
+            for coord in move['remove']:
+                self.remove(coord)
+                state['reserve'][player] += 1
+
 
     # return 0 or 1 if a winner, return None if draw, return -1 if game continue
     def winner(self):
         state = self._state['visible']
-        
+        if state['reserve'][0] < 1:
+            return 1
+        elif state['reserve'][1] < 1:
+            return 0
+        return -1
+
     # print the state
     def prettyprint(self):
-        state = self._state['visible']
-        
-
+        print(json.dumps(self._state['visible'], indent=4))       
 
 class PylosServer(game.GameServer):
     '''Class representing a server for the Pylos game.'''
@@ -55,10 +153,13 @@ class PylosServer(game.GameServer):
         super().__init__('Pylos', 2, PylosState(), verbose=verbose)
     
     def applymove(self, move):
-        self._state.update(move, self.currentplayer)
+        try:
+            self._state.update(json.loads(move), self.currentplayer)
+        except json.JSONDecodeError:
+            raise game.InvalidMoveException('move must be valid JSON string: {}'.format(move))
 
 
-class TicTacToeClient(game.GameClient):
+class PylosClient(game.GameClient):
     '''Class representing a client for the Pylos game.'''
     def __init__(self, name, server, verbose=False):
         super().__init__(server, PylosState, verbose=verbose)
@@ -69,7 +170,9 @@ class TicTacToeClient(game.GameClient):
     
     #return move as string
     def _nextmove(self, state):
-        ''' example of moves
+        '''
+        example of moves
+        coordinates are like [layer, row, colums]
         move = {
             'move': 'place',
             'to': [0,1,1]
@@ -91,10 +194,16 @@ class TicTacToeClient(game.GameClient):
             ]
         }
         
-        return it in JSON'''
-        
-        move = {}
-        return json.dumps(move)
+        return it in JSON
+        '''
+        for layer in range(4):
+            for row in range(4-layer):
+                for column in range(4-layer):
+                    if state.get(layer, row, column) == None:
+                        return json.dumps({
+                            'move': 'place',
+                            'to': [layer, row, column]
+                        })
 
 
 if __name__ == '__main__':
