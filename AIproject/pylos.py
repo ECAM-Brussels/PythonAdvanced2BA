@@ -2,6 +2,7 @@
 # pylos.py
 # Author: Quentin Lurkin
 # Version: April 28, 2017
+# -*- coding: utf-8 -*-
 
 import argparse
 import socket
@@ -34,14 +35,13 @@ class PylosState(game.GameState):
 
         super().__init__(initialstate)
 
-    def inBoard(self, layer, row, column):
-        return layer in range(4) and row in range(4-layer) and column in range(4-layer)
-
     def get(self, layer, row, column):
-        if(not self.inBoard(layer, row, column)):
-            raise game.InvalidMoveException('The position ({}) is outside of the board'.format(coord))
-        #print(json.dumps(self._state, indent=4))
-        return self._state['visible']['board'][layer][row][column]
+        if layer < 0 or row < 0 or column < 0:
+            raise game.InvalidMoveException('The position ({}) is outside of the board'.format([layer, row, column]))         
+        try:
+            return self._state['visible']['board'][layer][row][column]
+        except:
+            raise game.InvalidMoveException('The position ({}) is outside of the board'.format([layer, row, column]))
 
     def safeGet(self, layer, row, column):
         try:
@@ -49,10 +49,9 @@ class PylosState(game.GameState):
         except game.InvalidMoveException:
             return None
 
-    def validPosition(self, coord):
-        layer, row, column = tuple(coord)
+    def validPosition(self, layer, row, column):
         if self.get(layer, row, column) != None:
-            raise game.InvalidMoveException('The position ({}) is not free'.format(coord))
+            raise game.InvalidMoveException('The position ({}) is not free'.format([layer, row, column]))
 
         if layer > 0:
             if (
@@ -61,12 +60,11 @@ class PylosState(game.GameState):
                 self.get(layer-1, row+1, column+1) == None or
                 self.get(layer-1, row, column+1) == None
             ):
-                raise game.InvalidMoveException('The position ({}) is not stable'.format(coord))
+                raise game.InvalidMoveException('The position ({}) is not stable'.format([layer, row, column]))
 
-    def canMove(self, coord):
-        layer, row, column = tuple(coord)
+    def canMove(self, layer, row, column):
         if self.get(layer, row, column) == None:
-            raise game.InvalidMoveException('The position ({}) is empty'.format(coord))
+            raise game.InvalidMoveException('The position ({}) is empty'.format([layer, row, column]))
 
         if layer < 3:
             if (
@@ -75,7 +73,7 @@ class PylosState(game.GameState):
                 self.safeGet(layer+1, row-1, column-1) != None or
                 self.safeGet(layer+1, row, column-1) != None
             ):
-                raise game.InvalidMoveException('The position ({}) is not movable'.format(coord))
+                raise game.InvalidMoveException('The position ({}) is not movable'.format([layer, row, column]))
 
     def createSquare(self, coord):
         layer, row, column = tuple(coord)
@@ -101,12 +99,15 @@ class PylosState(game.GameState):
 
     def set(self, coord, value):
         layer, row, column = tuple(coord)
-        self.validPosition(coord)
+        self.validPosition(layer, row, column)
         self._state['visible']['board'][layer][row][column] = value
 
-    def remove(self, coord):
+    def remove(self, coord, player):
         layer, row, column = tuple(coord)
-        self.canMove(coord)
+        self.canMove(layer, row, column)
+        sphere = self.get(layer, row, column)
+        if sphere != player:
+            raise game.InvalidMoveException('not your sphere')
         self._state['visible']['board'][layer][row][column] = None
         
     # update the state with the move
@@ -119,7 +120,7 @@ class PylosState(game.GameState):
             self.set(move['to'], player)
             state['reserve'][player] -= 1
         elif move['move'] == 'move':
-            self.remove(move['from'])
+            sphere = self.remove(move['from'], player)
             self.set(move['to'], player)
         else:
             raise game.InvalidMoveException('Invalid Move:\n{}'.format(move))
@@ -130,8 +131,10 @@ class PylosState(game.GameState):
             if len(move['remove']) > 2:
                 raise game.InvalidMoveException('Can\'t remove more than 2 spheres')
             for coord in move['remove']:
-                self.remove(coord)
+                sphere = self.remove(coord, player)
                 state['reserve'][player] += 1
+
+        state['turn'] = (state['turn'] + 1) % 2
 
 
     # return 0 or 1 if a winner, return None if draw, return -1 if game continue
@@ -143,9 +146,30 @@ class PylosState(game.GameState):
             return 0
         return -1
 
+    def val2str(self, val):
+        return '_' if val == None else '@' if val == 0 else 'O'
+
+    def player2str(self, val):
+        return 'Light' if val == 0 else 'Dark'
+
+    def printSquare(self, matrix):
+        print(' ' + '_'*(len(matrix)*2-1))
+        print('\n'.join(map(lambda row : '|' + '|'.join(map(self.val2str, row)) + '|', matrix)))
+
     # print the state
     def prettyprint(self):
-        print(json.dumps(self._state['visible'], indent=4))       
+        state = self._state['visible']
+        for layer in range(4):
+            self.printSquare(state['board'][layer])
+            print()
+        
+        for player, reserve in enumerate(state['reserve']):
+            print('Reserve of {}:'.format(self.player2str(player)))
+            print((self.val2str(player)+' ')*reserve)
+            print()
+        
+        print('{} to play !'.format(self.player2str(state['turn'])))
+        #print(json.dumps(self._state['visible'], indent=4))       
 
 class PylosServer(game.GameServer):
     '''Class representing a server for the Pylos game.'''
