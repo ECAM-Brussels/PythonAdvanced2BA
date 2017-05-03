@@ -120,8 +120,14 @@ class PylosState(game.GameState):
             self.set(move['to'], player)
             state['reserve'][player] -= 1
         elif move['move'] == 'move':
+            if move['to'][0] <= move['from'][0]:
+                raise game.InvalidMoveException('you can only move to upper layer')
             sphere = self.remove(move['from'], player)
-            self.set(move['to'], player)
+            try:
+                self.set(move['to'], player)
+            except game.InvalidMoveException as e:
+                self.set(move['from'], player) 
+                raise e
         else:
             raise game.InvalidMoveException('Invalid Move:\n{}'.format(move))
 

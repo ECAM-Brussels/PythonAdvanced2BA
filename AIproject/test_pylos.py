@@ -159,6 +159,21 @@ class TestPylosState(unittest.TestCase):
                 ]
             }, 1)
 
+    def test_moveToSamePlace(self):
+        state = pylos.PylosState()
+        for layer in range(4):
+            for row in range(4-layer):
+                for column in range(4-layer):
+                    state.set([layer, row, column], 0)
+                    with self.assertRaises(game.InvalidMoveException):
+                        state.update({
+                            'move': 'move',
+                            'from': [layer, row, column],
+                            'to': [layer, row, column]
+                        }, 0)
+
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPylosState)
     runner = unittest.TextTestRunner()
