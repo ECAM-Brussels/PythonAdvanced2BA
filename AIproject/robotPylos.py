@@ -30,6 +30,7 @@ class RobotPylos(PylosClient):
         removes += positions[:]
         removes.append([])
 
+<<<<<<< HEAD
         for m in ['move', 'place']
             for f in positions if m==moves else [[]]:
                 for t in positions:
@@ -50,12 +51,42 @@ class RobotPylos(PylosClient):
                         moves.append(move)
                     except:
                         pass
+=======
+        for f in positions:
+            for t in positions:
+                move = {
+                    'move': 'move',
+                    'from': f,
+                    'to': t
+                }
+                try:
+                    newState = copy.deepcopy(state)
+                    newState.update(move, state._state['visible']['turn'])
+                    moves.append(move)
+                except:
+                    pass
+
+        for t in positions:
+            move = {
+                'move': 'place',
+                'to': t
+            }
+            try:
+                newState = copy.deepcopy(state)
+                newState.update(move, state._state['visible']['turn'])
+                moves.append(move)
+            except:
+                pass
+>>>>>>> master
 
         return moves
 
     def _nextmove(self, state):
         moves = self.findMoves(state)
+<<<<<<< HEAD
         print(moves)
+=======
+>>>>>>> master
         return json.dumps(moves[0])
 
         
