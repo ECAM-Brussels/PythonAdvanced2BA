@@ -131,12 +131,18 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: there is no one to move'.format(move))
                 nx, ny = self._getcoord((x, y, d))
                 new = people[nx][ny]
+
+                #King can enter the castle
+                if p == 'king' and ((x, y, d) == visible['castle'][0] or (x, y, d) == visible['castle'][1]):
+                    people[nx][ny]='king'
+                    continue
+
                 # King, assassins, villagers can only move on a free cell
                 if p != 'knight' and new is not None:
                     raise game.InvalidMoveException('{}: cannot move on a cell that is not free'.format(move))
                 if p == 'king' and BOARD[nx][ny] == 'R':
                     raise game.InvalidMoveException('{}: the king cannot move on a roof'.format(move))
-                if p in {'assassin'} + POPULATION and player != 0:
+                if p in {'assassin'}.union(POPULATION) and player != 0:
                     raise game.InvalidMoveException('{}: villagers and assassins can only be moved by player 0'.format(move))
                 if p in {'king', 'knight'} and player != 1:
                     raise game.InvalidMoveException('{}: the king and knights can only be moved by player 1'.format(move))
@@ -145,7 +151,7 @@ class KingAndAssassinsState(game.GameState):
                     people[x][y], people[nx][ny] = people[nx][ny], people[x][y]
                 # If cell is not free, check if the knight can push villagers
                 else:
-                    nf = self._nextfree((x, y, d))
+                    nf = self._nextfree(x, y, d)
                     if nf is None:
                         raise game.InvalidMoveException('{}: cannot move-and-push in the given direction'.format(move))
                     nfx, nfy = nf
@@ -181,10 +187,10 @@ class KingAndAssassinsState(game.GameState):
                     raise game.InvalidMoveException('{}: there is no one to kill'.format(move))
                 if killer == 'assassin' and target == 'knight':
                     visible['killed']['knights'] += 1
-                    people[tx][tx] = None
+                    people[tx][ty] = None
                 elif killer == 'knight' and target == 'assassin':
                     visible['killed']['assassins'] += 1
-                    people[tx][tx] = None
+                    people[tx][ty] = None
                 else:
                     raise game.InvalidMoveException('{}: forbidden kill'.format(move))
             # ('attack', x, y, dir): attacks the king in direction dir with assassin at position (x, y)
@@ -305,8 +311,9 @@ class KingAndAssassinsClient(game.GameClient):
     '''Class representing a client for the King & Assassins game'''
 
     def __init__(self, name, server, verbose=False):
-        super().__init__(server, KingAndAssassinsState, verbose=verbose)
         self.__name = name
+        super().__init__(server, KingAndAssassinsState, verbose=verbose)
+        # Nothing happen after super.__init__
 
     def _handle(self, message):
         pass
