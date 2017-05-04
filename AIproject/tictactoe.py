@@ -58,9 +58,10 @@ class TicTacToeServer(game.GameServer):
     def applymove(self, move):
         try:
             index = int(move)
-            self._state.update((index // 3, index % 3), self.currentplayer)
         except:
-            raise game.InvalidMoveException('A valid move must be a two-integer tuple')
+            raise game.InvalidMoveException('A valid move must be a stringified integer')
+        else:
+            self._state.update((index // 3, index % 3), self.currentplayer)
 
 
 class TicTacToeClient(game.GameClient):
