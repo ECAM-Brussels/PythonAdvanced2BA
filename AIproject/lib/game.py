@@ -111,7 +111,10 @@ class GameServer(metaclass=ABCMeta):
         s.listen(self.nbplayers)
         if self.__verbose:
             _printsection('Starting {}'.format(self.name))
-            print(' Game server listening on port {}.'.format(5000))
+            try:
+                print(' Game server listening on {}:{}.'.format(socket.gethostbyname(socket.gethostname()), 5000))
+            except:
+                print(' Game server listening on port {}.'.format(5000))
             print(' Waiting for {} players...'.format(self.nbplayers))
         self.__players = []
         # Wait for enough players for a play
