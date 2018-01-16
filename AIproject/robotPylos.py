@@ -2,64 +2,113 @@ import argparse
 from pylos import PylosClient
 import json
 import copy
+from functools import reduce
+
+
+def findMoves(state):
+    def allPositions():
+        positions = []
+        for layer in range(4):
+            for row in range(4-layer):
+                for column in range(4-layer):
+                    positions.append((layer, row, column))
+        return positions
+
+    def allCouples(liste):
+        couples = []
+        for i in range(len(liste)):
+            for j in range(i):
+                couples.append([liste[i], liste[j]])
+        return couples
+
+    def mine(state, player):
+        def f(pos):
+            layer, row, column = pos
+            return state.get(layer, row, column) == player
+        return f
+
+    def canMove(state):
+        def f(pos):
+            layer, row, column = pos
+            try:
+                state.canMove(layer, row, column)
+            except:
+                return False
+            return True
+        return f
+
+    def validPosition(state):
+        def f(pos):
+            layer, row, column = pos
+            try:
+                state.validPosition(layer, row, column)
+            except:
+                return False
+            return True
+        return f
+
+    def validMove(state):
+        def f(move):
+            newState = copy.deepcopy(state)
+            try:
+                newState.update(move, state._state['visible']['turn'])
+            except:
+                return False
+            return True
+        return f
+
+    def checkSQuares(state):
+        def f(moves, move):
+            newState = copy.deepcopy(state)
+            try:
+                newState.update(move, state._state['visible']['turn'])
+            except:
+                #print('INVALID !!!!!')
+                return moves
+
+            #if move is None:
+            #    print('AAAAAAAARRRRGGGGGGG!!!!!!!!!')
+            moves.append(move)
+            
+            if newState.createSquare(move['to']):
+                movables = list(filter(canMove(newState), list(filter(mine(newState, state._state['visible']['turn']), positions))))
+                #print('movable (for remove):', movables)
+                #print('allCouples (for remove):', allCouples(movables))
+                #print('allSingles (for remove):', list(map(lambda x: [x], movables)))
+                removables = allCouples(movables)
+                removables.extend(list(map(lambda x: [x], movables)))
+                #print('removables:', removables)
+                #print('copy:', copy.copy(move).update({'remove': []}))
+                #print('removes:', [dict(**move, remove=r) for r in removables])
+                moves.extend([dict(**move, remove=r) for r in removables])
+            
+            return moves
+        return f
+
+    positions = allPositions()
+    #print('positions:', positions)
+    movables = list(filter(canMove(state), list(filter(mine(state, state._state['visible']['turn']), positions))))
+    #print('movables:', movables)
+    valids = list(filter(validPosition(state), positions))
+    #print('valids:', valids)
+    moves = [{'move': 'move', 'from': f, 'to':t} for f in movables for t in valids]
+    #print('moves (1):', moves)
+    moves.extend([{'move': 'place', 'to': t} for t in valids])
+    #print('moves (2):', moves)
+    moves = reduce(checkSQuares(state) ,moves,[])
+    #print('moves (final):', moves)
+
+    return sorted(moves, key=lambda move: -((1 if move['move'] == 'move' else 0) + (len(move['remove']) if 'remove' in move else 0)))
+
 
 class RobotPylos(PylosClient):
     def __init__(self, name, server, verbose=False):
         super().__init__(name, server, verbose=verbose)
 
-    def allPositions(self):
-        positions = []
-        for layer in range(4):
-            for row in range(4-layer):
-                for column in range(4-layer):
-                    positions.append([layer, row, column])
-        return positions
-
-    def allCouples(self):
-        positions = self.allPositions()
-        couples = []
-        for i in range(len(positions)):
-            for j in range(i):
-                couples.append([positions[i], positions[j]])
-        return couples
-
-    def findMoves(self, state):
-        moves = []
-        positions = self.allPositions()
-        removes = self.allCouples()
-        removes += positions[:]
-        removes.append([])
-
-        for m in ['move', 'place']
-            for f in positions if m==moves else [[]]:
-                for t in positions:
-                    for r in removes:
-                    move = {
-                        'move': m,
-                        'from': f,
-                        'to': t,
-                        'remove': r
-                    }
-                    if move['move'] == 'place':
-                        del(move['from'])
-                    if len(move['remove']) == 0:
-                        del(move['remove'])
-                    try:
-                        newState = copy.deepcopy(state)
-                        newState.update(move, state._state['visible']['turn'])
-                        moves.append(move)
-                    except:
-                        pass
-
-        return moves
-
     def _nextmove(self, state):
-        moves = self.findMoves(state)
-        print(moves)
+        moves = findMoves(state)
         return json.dumps(moves[0])
 
-        
-                    
 
 if __name__ == '__main__':
     # Create the top-level parser
