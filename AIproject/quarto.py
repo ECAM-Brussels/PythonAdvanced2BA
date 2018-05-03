@@ -8,6 +8,7 @@ import socket
 import sys
 import random
 import json
+import copy
 
 from lib import game
 
@@ -42,39 +43,42 @@ class QuartoState(game.GameState):
 
     def applymove(self, move):
         #{pos: 8, quarto: true, nextPiece: 2}
-        state = self._state['visible']
-        if state['pieceToPlay'] is not None:
-            try:
-                if state['board'][move['pos']] is not None:
-                    raise game.InvalidMoveException('The position is not free')
-                state['board'][move['pos']] = state['remainingPieces'][state['pieceToPlay']]
-                del(state['remainingPieces'][state['pieceToPlay']])
-            except game.InvalidMoveException as e:
-                raise e
-            except:
-                raise game.InvalidMoveException("Your move should contain a \"pos\" key in range(16)")
-
+        stateBackup = copy.deepcopy(self._state)
         try:
-            state['pieceToPlay'] = move['nextPiece']
-        except:
-            raise game.InvalidMoveException("You must specify the next piece to play")
+            state = self._state['visible']
+            if state['pieceToPlay'] is not None:
+                try:
+                    if state['board'][move['pos']] is not None:
+                        raise game.InvalidMoveException('The position is not free')
+                    state['board'][move['pos']] = state['remainingPieces'][state['pieceToPlay']]
+                    del(state['remainingPieces'][state['pieceToPlay']])
+                except game.InvalidMoveException as e:
+                    raise e
+                except:
+                    raise game.InvalidMoveException("Your move should contain a \"pos\" key in range(16)")
 
-        if 'quarto' in move:
-            state['quartoAnnounced'] = move['quarto']
-            winner = self.winner()
-            if winner is None or winner == -1:
-                raise game.InvalidMoveException("There is no Quarto !")
-        else:
-            state['quartoAnnounced'] = False
+            try:
+                state['pieceToPlay'] = move['nextPiece']
+            except:
+                raise game.InvalidMoveException("You must specify the next piece to play")
+
+            if 'quarto' in move:
+                state['quartoAnnounced'] = move['quarto']
+                winner = self.winner()
+                if winner is None or winner == -1:
+                    raise game.InvalidMoveException("There is no Quarto !")
+            else:
+                state['quartoAnnounced'] = False
+        except game.InvalidMoveException as e:
+            self._state = stateBackup
+            raise e
 
     
     def _same(self, feature, elems):
-        
         try:
             elems = list(map(lambda piece: piece[feature], elems))
         except:
             return False
-        print('SAME:\nelems: {}\nfeature: {}'.format(elems, feature))
         return all(e == elems[0] for e in elems)
 
     def _quarto(self, elems):
