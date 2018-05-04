@@ -7,7 +7,6 @@ import copy
 import json
 import socket
 import sys
-import random
 
 DEFAULT_BUFFER_SIZE = 2048
 SECTION_WIDTH = 60
@@ -26,14 +25,27 @@ class InvalidMoveException(Exception):
 
 class GameState(metaclass=ABCMeta):
     '''Abstract class representing a generic game state.'''
-    def __init__(self, visible, hidden=None):
-        self._state = {'visible': visible, 'hidden': hidden}
+    def __init__(self, visible, hidden=None, currentPlayer=0):
+        self._state = {'visible': visible, 'hidden': hidden, 'currentPlayer': currentPlayer}
 
     def __str__(self):
-        return json.dumps(self._state['visible'], separators=(',', ':'))
+        return json.dumps({'visible': self._state['visible'], 'currentPlayer': self._state['currentPlayer']}, separators=(',', ':'))
 
     def __repr__(self):
         return json.dumps(self._state, separators=(',', ':'))
+
+    @property
+    def currentplayer(self):
+        return self._state['currentPlayer']
+
+    @abstractmethod
+    def nextPlayer(self):
+        '''Change the current player according to the game rules
+
+        Pre: -
+        Post: The 'currentPlayer' state is set to the next player to play
+        '''
+        ...
 
     @abstractmethod
     def winner(self):
@@ -57,7 +69,8 @@ class GameState(metaclass=ABCMeta):
 
     @classmethod
     def parse(cls, state):
-        return cls(json.loads(state))
+        parsed = json.loads(state)
+        return cls(parsed['visible'], currentPlayer=parsed['currentPlayer'])
 
     @classmethod
     def buffersize(cls):
@@ -72,7 +85,6 @@ class GameServer(metaclass=ABCMeta):
         self.__verbose = verbose
         self._state = initialstate
         # Stats about the running game
-        self.__currentplayer = None
         self.__turns = 0
 
     @property
@@ -85,7 +97,7 @@ class GameServer(metaclass=ABCMeta):
 
     @property
     def currentplayer(self):
-        return self.__currentplayer
+        return self._state.currentplayer
 
     @property
     def turns(self):
@@ -157,17 +169,15 @@ class GameServer(metaclass=ABCMeta):
         return True
 
     def _gameloop(self):
-        random.seed()
-        self.__currentplayer = random.randrange(2)
         winner = -1
         if self.__verbose:
             print(' Initial state:')
             self._state.prettyprint()
         # Loop until the game ends with a winner or with a draw
         while winner == -1:
-            player = self.__players[self.__currentplayer]
+            player = self.__players[self.currentplayer]
             if self.__verbose:
-                print("\n=> Turn #{} (player {})".format(self.turns, self.__currentplayer))
+                print("\n=> Turn #{} (player {})".format(self.turns, self.currentplayer))
             player.sendall('PLAY {}'.format(self.state).encode())
             try:
                 move = player.recv(self._state.__class__.buffersize()).decode()
@@ -175,7 +185,7 @@ class GameServer(metaclass=ABCMeta):
                     print('   Move:', move)
                 self.applymove(move)
                 self.__turns += 1
-                self.__currentplayer = (self.__currentplayer + 1) % self.nbplayers
+                self._state.nextPlayer()
             except InvalidMoveException as e:
                 if self.__verbose:
                     print('Invalid move:', e)

@@ -6,7 +6,7 @@ class Quarto(TwoPlayersGame):
     def __init__(self, players):
         self.players = players
         self.nplayer = 1 # player 1 starts
-        self.state = QuartoState()
+        self.state = QuartoState(currentPlayer=self.nplayer-1)
 
     def possible_moves(self):
         state = self.state._state['visible']
@@ -19,10 +19,24 @@ class Quarto(TwoPlayersGame):
 
         for p in range(16):
             if state['board'][p] is None:
-                for n in range(len(state['remainingPieces'])-1):
+                if len(state['remainingPieces']) > 1:
+                    for n in range(len(state['remainingPieces'])-1):
+                        move = {
+                            'pos': p,
+                            'nextPiece': n,
+                            'quarto': True
+                        }
+
+                        try:
+                            stateCopy = copy.deepcopy(self.state)
+                            stateCopy.applymove(move)
+                        except:
+                            del(move['quarto'])
+                        
+                        moves.append(move)
+                else:
                     move = {
                         'pos': p,
-                        'nextPiece': n,
                         'quarto': True
                     }
 
@@ -31,12 +45,17 @@ class Quarto(TwoPlayersGame):
                         stateCopy.applymove(move)
                     except:
                         del(move['quarto'])
-                    
+
                     moves.append(move)
+
+        print('possible_moves:', len(moves))
+        if len(moves) == 0:
+            self.state.prettyprint()
         return moves
 
     def make_move(self,move):
         self.state.applymove(move)
+        self.state.nextPlayer()
 
     def is_over(self):
         return self.state.winner() != -1
@@ -45,10 +64,11 @@ class Quarto(TwoPlayersGame):
         self.state.prettyprint()
 
     def scoring(self):
-        if self.state.winner() is None:
+        winner = self.state.winner()
+        if winner is None or winner == -1:
             return 0
         
-        if self.state.winner() != -1:
+        if self.state.winner() == self.state.currentplayer:
             return 100
         
         return -100

@@ -14,7 +14,7 @@ from lib import game
 
 class QuartoState(game.GameState):
     '''Class representing a state for the Quarto game.'''
-    def __init__(self, initialstate=None):
+    def __init__(self, initialstate=None, currentPlayer=None):
         self.__player = 0
         random.seed()
         if initialstate is None:
@@ -36,10 +36,10 @@ class QuartoState(game.GameState):
                 'quartoAnnounced': False
             }
 
-        super().__init__(initialstate)
+        if currentPlayer is None:
+            currentPlayer = random.randrange(2)
 
-    def setPlayer(self, player):
-        self.__player = player
+        super().__init__(initialstate, currentPlayer=currentPlayer)
 
     def applymove(self, move):
         #{pos: 8, quarto: true, nextPiece: 2}
@@ -57,10 +57,13 @@ class QuartoState(game.GameState):
                 except:
                     raise game.InvalidMoveException("Your move should contain a \"pos\" key in range(16)")
 
-            try:
-                state['pieceToPlay'] = move['nextPiece']
-            except:
-                raise game.InvalidMoveException("You must specify the next piece to play")
+            if len(state['remainingPieces']) > 0:
+                try:
+                    state['pieceToPlay'] = move['nextPiece']
+                except:
+                    raise game.InvalidMoveException("You must specify the next piece to play")
+            else:
+                state['pieceToPlay'] = None
 
             if 'quarto' in move:
                 state['quartoAnnounced'] = move['quarto']
@@ -87,7 +90,7 @@ class QuartoState(game.GameState):
     def winner(self):
         state = self._state['visible']
         board = state['board']
-        player = self.__player
+        player = self._state['currentPlayer']
 
         # 00 01 02 03
         # 04 05 06 07
@@ -119,14 +122,23 @@ class QuartoState(game.GameState):
 
     def prettyprint(self):
         state = self._state['visible']
+
+        print('Board:')
         for row in range(4):
             print('|', end="")
             for col in range(4):
                 print(self.displayPiece(state['board'][row*4+col]), end="|")
             print()
         
-        
+        print('\nRemaining Pieces:')
         print(", ".join([self.displayPiece(piece) for piece in state['remainingPieces']]))
+
+        if state['pieceToPlay'] is not None:
+            print('\nPiece to Play:')
+            print(self.displayPiece(state['remainingPieces'][state['pieceToPlay']]))
+
+    def nextPlayer(self):
+        self._state['currentPlayer'] = (self._state['currentPlayer'] + 1) % 2
 
 
 class QuartoServer(game.GameServer):
@@ -140,7 +152,6 @@ class QuartoServer(game.GameServer):
         except:
             raise game.InvalidMoveException('A valid move must be a valid JSON string')
         else:
-            self._state.setPlayer(self.currentplayer)
             self._state.applymove(move)
 
 
