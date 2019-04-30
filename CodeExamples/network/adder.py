@@ -8,12 +8,12 @@ import socket
 import struct
 import sys
 
-SERVERADDRESS = (socket.gethostname(), 6000)
+PORT = 6000
 
 class AdderServer:
     def __init__(self):
         self.__s = socket.socket()
-        self.__s.bind(SERVERADDRESS)
+        self.__s.bind(("0.0.0.0", PORT))
         
     def run(self):
         self.__s.listen()
@@ -34,13 +34,14 @@ class AdderServer:
 
 
 class AdderClient:
-    def __init__(self, message):
+    def __init__(self, message, serverIP="127.0.0.1"):
         self.__data = [int(x) for x in message]
         self.__s = socket.socket()
+        self.serverIP = serverIP
     
     def run(self):
         try:
-            self.__s.connect(SERVERADDRESS)
+            self.__s.connect((self.serverIP, PORT))
             print('Somme:', self._compute())
             self.__s.close()
         except OSError:
@@ -61,5 +62,14 @@ class AdderClient:
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'server':
         AdderServer().run()
+    
     elif len(sys.argv) > 2 and sys.argv[1] == 'client':
-        AdderClient(sys.argv[2:]).run()
+        params = sys.argv[2:]
+
+        try:
+            isInt = int(params[0])
+            AdderClient(params).run()
+        except:
+            ip = params[0]
+            params = params[1:]
+            AdderClient(params, ip).run()

@@ -8,7 +8,7 @@ import sys
 import threading
 
 class Chat:
-    def __init__(self, host=socket.gethostname(), port=5000):
+    def __init__(self, host="0.0.0.0", port=5000):
         s = socket.socket(type=socket.SOCK_DGRAM)
         s.settimeout(0.5)
         s.bind((host, port))
@@ -51,7 +51,7 @@ class Chat:
         tokens = param.split(' ')
         if len(tokens) == 2:
             try:
-                self.__address = (socket.gethostbyaddr(tokens[0])[0], int(tokens[1]))
+                self.__address = (tokens[0], int(tokens[1]))
                 print('Connecté à {}:{}'.format(*self.__address))
             except OSError:
                 print("Erreur lors de l'envoi du message.")
@@ -71,7 +71,7 @@ class Chat:
         while self.__running:
             try:
                 data, address = self.__s.recvfrom(1024)
-                print(data.decode())
+                print("[{}] {}".format(address, data.decode()))
             except socket.timeout:
                 pass
             except OSError:
@@ -80,5 +80,7 @@ class Chat:
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         Chat(sys.argv[1], int(sys.argv[2])).run()
+    elif len(sys.argv) == 2:
+        Chat(port=int(sys.argv[1])).run()
     else:
         Chat().run()
